@@ -6,6 +6,7 @@ import os
 import glob
 import logging
 import shutil
+import requests
 
 import yaml
 import re
