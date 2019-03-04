@@ -26,7 +26,7 @@ class UnityEnvironment(object):
 
     def __init__(self, file_name=None, worker_id=0,
                  base_port=5005, seed=0,
-                 docker_training=False, no_graphics=False):
+                 docker_training=False, no_graphics=False, api_connection=False):
         """
         Starts a new unity environment and establishes a connection with the environment.
         Notice: Currently communication between Unity and Python takes place over an open socket without authentication.
@@ -84,7 +84,7 @@ class UnityEnvironment(object):
         self._external_brain_names = []
         for brain_param in aca_params.brain_parameters:
             self._brain_names += [brain_param.brain_name]
-            self._brains[brain_param.brain_name] = BrainParameters.from_proto(brain_param)
+            self._brains[brain_param.brain_name] = BrainParameters.from_proto(brain_param, api_connection)
             if brain_param.is_training:
                 self._external_brain_names += [brain_param.brain_name]
         self._num_brains = len(self._brain_names)

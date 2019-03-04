@@ -13,30 +13,18 @@ logger = logging.getLogger("mlagents.trainers")
 
 headers = {"X-Api-Key": "da2-jg5uf3pqnnfixhnmji7etipzlq", "Content-Type": "application/json"}
 
-episodeQuery = """
-{
-  viewer {
-    login
-  }
-  rateLimit {
-    limit
-    cost
-    remaining
-    resetAt
-  }
-}
+episodeSetQuery = string.Template(
 """
-
-episodeSetQuery = string.Template("""
   mutation {
   createStep(input: {
       meanReward: $meanReward, standardReward: $standardReward, stepEpisodeId: $brainName
-      }) {
-    meanReward
-    standardReward
+    }) {
+      meanReward
+      standardReward
     }
-    }
-""")
+  }
+"""
+)
 
 
 class UnityTrainerException(UnityException):
@@ -171,11 +159,12 @@ class Trainer(object):
         """
         raise UnityTrainerException("The update_model method was not implemented.")
 
-    def save_model(self):
+    def save_model(self, api_connection):
         """
         Saves the model
         """
-        self.post_episode_set(self)
+        if api_connection:
+            self.post_episode_set(self)
         self.policy.save_model(self.get_step)
 
     def export_model(self):

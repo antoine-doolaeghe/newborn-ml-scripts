@@ -27,7 +27,7 @@ class TrainerController(object):
     def __init__(self, env_path, run_id, save_freq, curriculum_folder,
                  fast_simulation, load, train, worker_id, keep_checkpoints,
                  lesson, seed, docker_target_name,
-                 trainer_config_path, no_graphics):
+                 trainer_config_path, no_graphics, api_connection):
         """
         :param env_path: Location to the environment executable to be loaded.
         :param run_id: The sub-directory name for model and summary statistics
@@ -110,7 +110,8 @@ class TrainerController(object):
                                     worker_id=self.worker_id,
                                     seed=self.seed,
                                     docker_training=self.docker_training,
-                                    no_graphics=no_graphics)
+                                    no_graphics=no_graphics,
+                                    api_connection=api_connection)
         if env_path is None:
             self.env_name = 'editor_' + self.env.academy_name
         else:
@@ -172,14 +173,14 @@ class TrainerController(object):
         else:
             return None
 
-    def _save_model(self,steps=0):
+    def _save_model(self,api_connection,steps=0):
         """
         Saves current model to checkpoint folder.
         :param steps: Current number of steps in training process.
         :param saver: Tensorflow saver for session.
         """
         for brain_name in self.trainers.keys():
-            self.trainers[brain_name].save_model()
+            self.trainers[brain_name].save_model(api_connection)
         self.logger.info('Saved Model')
 
     def _export_graph(self):
@@ -275,7 +276,7 @@ class TrainerController(object):
         else:
             return self.env.reset(train_mode=self.fast_simulation)
 
-    def start_learning(self):
+    def start_learning(self, api_connection):
         # TODO: Should be able to start learning at different lesson numbers
         # for each curriculum.
         if self.meta_curriculum is not None:
@@ -367,18 +368,18 @@ class TrainerController(object):
                 if global_step % self.save_freq == 0 and global_step != 0 \
                         and self.train_model:
                     # Save Tensorflow model
-                    self._save_model(steps=global_step)
+                    self._save_model(api_connection, steps=global_step)
                 curr_info = new_info
             # Final save Tensorflow model
             if global_step != 0 and self.train_model:
-                self._save_model(steps=global_step)
+                self._save_model(api_connection, steps=global_step)
         except KeyboardInterrupt:
             print('--------------------------Now saving model--------------'
                   '-----------')
             if self.train_model:
                 self.logger.info('Learning was interrupted. Please wait '
                                  'while the graph is generated.')
-                self._save_model(steps=global_step)
+                self._save_model(api_connection, steps=global_step)
             pass
         self.env.close()
         if self.train_model:
