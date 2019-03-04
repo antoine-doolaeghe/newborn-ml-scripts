@@ -1,17 +1,36 @@
 import logging
 import numpy as np
 import io
+import requests
+import string 
 
+from mlagents.envs.exception import UnityEnvironmentException
 from typing import Dict
 from PIL import Image
 
 logger = logging.getLogger("mlagents.envs")
 
+headers = {"X-Api-Key": "da2-jg5uf3pqnnfixhnmji7etipzlq", "Content-Type": "application/json"}
+
+episodeQuery = string.Template(
+"""
+  mutation {
+  createEpisode(input: {
+        id: $id, episodeGenerationId: $id
+      }) {
+        id
+        }
+    }
+"""
+)
+
+episodeid = ""
+
 
 class BrainInfo:
     def __init__(self, visual_observation, vector_observation, text_observations, memory=None,
                  reward=None, agents=None, local_done=None,
-                 vector_action=None, text_action=None, max_reached=None, action_mask=None):
+                 vector_action=None, text_action=None, max_reached=None, action_mask=None, episode_id = None):
         """
         Describes experience at current step of all agents linked to a brain.
         """
@@ -26,6 +45,7 @@ class BrainInfo:
         self.previous_vector_actions = vector_action
         self.previous_text_actions = text_action
         self.action_masks = action_mask
+        self.episode_id = episode_id
 
     @staticmethod
     def process_pixels(image_bytes, gray_scale):
@@ -99,7 +119,7 @@ AllBrainInfo = Dict[str, BrainInfo]
 class BrainParameters:
     def __init__(self, brain_name, vector_observation_space_size, num_stacked_vector_observations,
                  camera_resolutions, vector_action_space_size,
-                 vector_action_descriptions, vector_action_space_type):
+                 vector_action_descriptions, vector_action_space_type, episode_id=None, api_connection=False):
         """
         Contains all brain-specific parameters.
         """
@@ -111,6 +131,10 @@ class BrainParameters:
         self.vector_action_space_size = vector_action_space_size
         self.vector_action_descriptions = vector_action_descriptions
         self.vector_action_space_type = ["discrete", "continuous"][vector_action_space_type]
+        self.episode_id = episode_id
+
+        if api_connection:
+            self.post_episode(self, self.brain_name)
 
     def __str__(self):
         return '''Unity brain name: {}
@@ -128,7 +152,7 @@ class BrainParameters:
                                                  ', '.join(self.vector_action_descriptions))
 
     @staticmethod
-    def from_proto(brain_param_proto):
+    def from_proto(brain_param_proto, api_connection):
         """
         Converts brain parameter proto to BrainParameter object.
         :param brain_param_proto: protobuf object.
@@ -139,11 +163,28 @@ class BrainParameters:
             "width": x.width,
             "blackAndWhite": x.gray_scale
         } for x in brain_param_proto.camera_resolutions]
+
         brain_params = BrainParameters(brain_param_proto.brain_name,
                                        brain_param_proto.vector_observation_size,
                                        brain_param_proto.num_stacked_vector_observations,
                                        resolution,
                                        brain_param_proto.vector_action_size,
                                        brain_param_proto.vector_action_descriptions,
-                                       brain_param_proto.vector_action_space_type)
+                                       brain_param_proto.vector_action_space_type,
+                                       episodeid,
+                                       api_connection)
         return brain_params
+
+    @staticmethod
+    def post_episode(self, brain_id): # A simple function to use requests.post to make the API call. Note the json= section.
+        request = requests.post('https://oyahtl2jibczvphcfmvxtjiqy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeQuery.substitute(id= brain_id)}, headers=headers)
+        if request.status_code == 200:
+            if "errors" in request.json():
+                raise UnityEnvironmentException(request.json()["errors"])
+            else:
+                episodeid = request.json()["data"]["createEpisode"]["id"]
+                return request.json()
+        else:
+            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, episodeQuery.substitute(id= brainId)))
+
+

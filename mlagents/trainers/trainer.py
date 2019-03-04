@@ -4,9 +4,27 @@ import logging
 import tensorflow as tf
 import numpy as np
 
+import string
+import requests
+from mlagents.envs.brain import BrainParameters
 from mlagents.envs import UnityException, AllBrainInfo
 
 logger = logging.getLogger("mlagents.trainers")
+
+headers = {"X-Api-Key": "da2-jg5uf3pqnnfixhnmji7etipzlq", "Content-Type": "application/json"}
+
+episodeSetQuery = string.Template(
+"""
+  mutation {
+  createStep(input: {
+      meanReward: $meanReward, standardReward: $standardReward, stepEpisodeId: $brainName
+    }) {
+      meanReward
+      standardReward
+    }
+  }
+"""
+)
 
 
 class UnityTrainerException(UnityException):
@@ -35,6 +53,8 @@ class Trainer(object):
         self.stats = {}
         self.summary_writer = None
         self.policy = None
+        self.mean_rewards = []
+        self.standard_rewards = []
 
     def __str__(self):
         return '''{} Trainer'''.format(self.__class__)
@@ -139,10 +159,12 @@ class Trainer(object):
         """
         raise UnityTrainerException("The update_model method was not implemented.")
 
-    def save_model(self):
+    def save_model(self, api_connection):
         """
         Saves the model
         """
+        if api_connection:
+            self.post_episode_set(self)
         self.policy.save_model(self.get_step)
 
     def export_model(self):
@@ -161,8 +183,7 @@ class Trainer(object):
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
             if len(self.stats['Environment/Cumulative Reward']) > 0:
                 mean_reward = np.mean(self.stats['Environment/Cumulative Reward'])
-                ## you WANT to make an api request here......
-                
+                self.add_set(self, np.mean(self.stats['Environment/Cumulative Reward']), np.std(self.stats['Environment/Cumulative Reward']))
                 logger.info(" {}: {}: Step: {}. Mean Reward: {:0.3f}. Std of Reward: {:0.3f}. {}"
                             .format(self.run_id, self.brain_name,
                                     min(self.get_step, self.get_max_steps),
@@ -198,3 +219,19 @@ class Trainer(object):
             logger.info(
                 "Cannot write text summary for Tensorboard. Tensorflow version must be r1.2 or above.")
             pass
+
+
+    @staticmethod
+    def add_set(self, mean_reward, standard_reward): # A simple function to use requests.post to make the API call. Note the json= section.
+        self.mean_rewards.append(mean_reward)
+        self.standard_rewards.append(standard_reward)
+
+    @staticmethod
+    def post_episode_set(self): # A simple function to use requests.post to make the API call. Note the json= section.
+        request = requests.post('https://oyahtl2jibczvphcfmvxtjiqy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeSetQuery.substitute(meanReward = self.mean_rewards, standardReward = self.standard_rewards, brainName = self.brain_name)}, headers=headers)
+        if request.status_code == 200:
+            print(request.json())
+            return request.json()
+        else:
+            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, episodeSetQuery.substitute(meanReward= meanReward, standardReward=standardReward)))
+
