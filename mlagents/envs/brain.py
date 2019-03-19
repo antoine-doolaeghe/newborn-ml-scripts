@@ -10,7 +10,7 @@ from PIL import Image
 
 logger = logging.getLogger("mlagents.envs")
 
-headers = {"X-Api-Key": "da2-jg5uf3pqnnfixhnmji7etipzlq", "Content-Type": "application/json"}
+headers = {"X-Api-Key": "da2-ly5smzk2tra2vgssat72td7i3a", "Content-Type": "application/json"}
 
 episodeQuery = string.Template(
 """
@@ -177,7 +177,7 @@ class BrainParameters:
 
     @staticmethod
     def post_episode(self, brain_id): # A simple function to use requests.post to make the API call. Note the json= section.
-        request = requests.post('https://oyahtl2jibczvphcfmvxtjiqy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeQuery.substitute(id= brain_id)}, headers=headers)
+        request = requests.post('https://moxmi3ewkbhztnhwwzuffvbbti.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeQuery.substitute(id= brain_id)}, headers=headers)
         if request.status_code == 200:
             if "errors" in request.json():
                 raise UnityEnvironmentException(request.json()["errors"])
@@ -185,6 +185,6 @@ class BrainParameters:
                 episodeid = request.json()["data"]["createEpisode"]["id"]
                 return request.json()
         else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, episodeQuery.substitute(id= brainId)))
+            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, episodeQuery.substitute(id= brain_id)))
 
 
