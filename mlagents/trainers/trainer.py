@@ -11,13 +11,13 @@ from mlagents.envs import UnityException, AllBrainInfo
 
 logger = logging.getLogger("mlagents.trainers")
 
-headers = {"X-Api-Key": "da2-jg5uf3pqnnfixhnmji7etipzlq", "Content-Type": "application/json"}
+headers = {"X-Api-Key": "da2-ly5smzk2tra2vgssat72td7i3a", "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
 """
   mutation {
-  createStep(input: {
-      meanReward: $meanReward, standardReward: $standardReward, stepEpisodeId: $brainName
+  createSummary(input: {
+      meanReward: $meanReward, standardReward: $standardReward, step: $step, summaryEpisodeId: $brainName
     }) {
       meanReward
       standardReward
@@ -163,8 +163,6 @@ class Trainer(object):
         """
         Saves the model
         """
-        if api_connection:
-            self.post_episode_set(self)
         self.policy.save_model(self.get_step)
 
     def export_model(self):
@@ -173,7 +171,7 @@ class Trainer(object):
         """
         self.policy.export_model()
 
-    def write_summary(self, global_step, lesson_num=0):
+    def write_summary(self, global_step, api_connection, lesson_num=0):
         """
         Saves training statistics to Tensorboard.
         :param lesson_num: Current lesson number in curriculum.
@@ -183,7 +181,11 @@ class Trainer(object):
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
             if len(self.stats['Environment/Cumulative Reward']) > 0:
                 mean_reward = np.mean(self.stats['Environment/Cumulative Reward'])
-                self.add_set(self, np.mean(self.stats['Environment/Cumulative Reward']), np.std(self.stats['Environment/Cumulative Reward']))
+                std_reward = np.std(self.stats['Environment/Cumulative Reward'])
+
+                if api_connection:
+                    self.post_episode_set(self, min(self.get_step, self.get_max_steps), mean_reward, std_reward)
+
                 logger.info(" {}: {}: Step: {}. Mean Reward: {:0.3f}. Std of Reward: {:0.3f}. {}"
                             .format(self.run_id, self.brain_name,
                                     min(self.get_step, self.get_max_steps),
@@ -222,13 +224,13 @@ class Trainer(object):
 
 
     @staticmethod
-    def add_set(self, mean_reward, standard_reward): # A simple function to use requests.post to make the API call. Note the json= section.
+    def add_set(self, mean_reward, standard_reward): 
         self.mean_rewards.append(mean_reward)
         self.standard_rewards.append(standard_reward)
 
     @staticmethod
-    def post_episode_set(self): # A simple function to use requests.post to make the API call. Note the json= section.
-        request = requests.post('https://oyahtl2jibczvphcfmvxtjiqy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeSetQuery.substitute(meanReward = self.mean_rewards, standardReward = self.standard_rewards, brainName = self.brain_name)}, headers=headers)
+    def post_episode_set(self, step, mean_rewards, std_rewards): 
+        request = requests.post('https://moxmi3ewkbhztnhwwzuffvbbti.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeSetQuery.substitute(meanReward = mean_rewards, standardReward = std_rewards, step = step, brainName = self.brain_name)}, headers=headers)
         if request.status_code == 200:
             print(request.json())
             return request.json()

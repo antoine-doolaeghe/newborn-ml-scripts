@@ -356,11 +356,12 @@ class TrainerController(object):
                     if self.meta_curriculum is not None:
                         trainer.write_summary(
                             global_step,
+                            api_connection,
                             lesson_num=self.meta_curriculum
                                 .brains_to_curriculums[brain_name]
                                 .lesson_num)
                     else:
-                        trainer.write_summary(global_step)
+                        trainer.write_summary(global_step, api_connection)
                     if self.train_model \
                             and trainer.get_step <= trainer.get_max_steps:
                         trainer.increment_step_and_update_last_reward()
