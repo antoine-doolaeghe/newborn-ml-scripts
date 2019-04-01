@@ -2,7 +2,8 @@ import logging
 import numpy as np
 import io
 import requests
-import string 
+import string
+import uuid
 
 from mlagents.envs.exception import UnityEnvironmentException
 from typing import Dict
@@ -12,11 +13,11 @@ logger = logging.getLogger("mlagents.envs")
 
 headers = {"X-Api-Key": "da2-rbxq3r664bapfeghuz2znft5r4", "Content-Type": "application/json"}
 
-episodeQuery = string.Template(
+episodePostQuery = string.Template(
 """
   mutation {
   createEpisode(input: {
-        id: $id, episodeGenerationId: $id
+        id: "$uuid", episodeModelId: "$id"
       }) {
         id
         }
@@ -25,6 +26,7 @@ episodeQuery = string.Template(
 )
 
 episodeid = ""
+
 
 
 class BrainInfo:
@@ -133,8 +135,11 @@ class BrainParameters:
         self.vector_action_space_type = ["discrete", "continuous"][vector_action_space_type]
         self.episode_id = episode_id
 
+        episode_uuid = uuid.uuid4().hex
+        print(episode_uuid)
         if api_connection:
-            self.post_episode(self, self.brain_name)
+            print("POSTING EPISODE")
+            self.post_episode(self, self.brain_name, episode_uuid)
 
     def __str__(self):
         return '''Unity brain name: {}
@@ -175,16 +180,18 @@ class BrainParameters:
                                        api_connection)
         return brain_params
 
+
     @staticmethod
-    def post_episode(self, brain_id): # A simple function to use requests.post to make the API call. Note the json= section.
-        request = requests.post('https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeQuery.substitute(id= brain_id)}, headers=headers)
+    def post_episode(self, brain_id, uuid):
+        request = requests.post('https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql',
+                                json={'query': episodePostQuery.substitute(id=brain_id, uuid=uuid)}, headers=headers)
         if request.status_code == 200:
             if "errors" in request.json():
                 raise UnityEnvironmentException(request.json()["errors"])
             else:
-                episodeid = request.json()["data"]["createEpisode"]["id"]
                 return request.json()
         else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, episodeQuery.substitute(id= brain_id)))
+            raise Exception("Query failed to run by returning code of {}. {}".format(
+                request.status_code, episodePostQuery.substitute(id=brain_id, uuid=uuid)))
 
 
