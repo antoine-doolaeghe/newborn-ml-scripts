@@ -11,7 +11,7 @@ from mlagents.envs import UnityException, AllBrainInfo
 
 logger = logging.getLogger("mlagents.trainers")
 
-headers = {"X-Api-Key": "da2-ly5smzk2tra2vgssat72td7i3a", "Content-Type": "application/json"}
+headers = {"X-Api-Key": "da2-rbxq3r664bapfeghuz2znft5r4", "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
 """
@@ -230,7 +230,7 @@ class Trainer(object):
 
     @staticmethod
     def post_episode_set(self, step, mean_rewards, std_rewards): 
-        request = requests.post('https://moxmi3ewkbhztnhwwzuffvbbti.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeSetQuery.substitute(meanReward = mean_rewards, standardReward = std_rewards, step = step, brainName = self.brain_name)}, headers=headers)
+        request = requests.post('https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={'query': episodeSetQuery.substitute(meanReward = mean_rewards, standardReward = std_rewards, step = step, brainName = self.brain_name)}, headers=headers)
         if request.status_code == 200:
             print(request.json())
             return request.json()
