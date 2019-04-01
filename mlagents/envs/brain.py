@@ -136,9 +136,7 @@ class BrainParameters:
         self.episode_id = episode_id
 
         episode_uuid = uuid.uuid4().hex
-        print(episode_uuid)
         if api_connection:
-            print("POSTING EPISODE")
             self.post_episode(self, self.brain_name, episode_uuid)
 
     def __str__(self):
