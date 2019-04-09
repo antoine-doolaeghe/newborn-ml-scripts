@@ -20,11 +20,11 @@ def run_training(sub_id, run_seed, run_options, process_queue):
     """
     # Docker Parameters
     docker_target_name = (run_options['--docker-target-name']
-        if run_options['--docker-target-name'] != 'None' else None)
+                          if run_options['--docker-target-name'] != 'None' else None)
 
     # General parameters
     env_path = (run_options['--env']
-        if run_options['--env'] != 'None' else None)
+                if run_options['--env'] != 'None' else None)
     run_id = run_options['--run-id']
     load_model = run_options['--load']
     train_model = run_options['--train']
@@ -32,7 +32,7 @@ def run_training(sub_id, run_seed, run_options, process_queue):
     keep_checkpoints = int(run_options['--keep-checkpoints'])
     worker_id = int(run_options['--worker-id'])
     curriculum_file = (run_options['--curriculum']
-        if run_options['--curriculum'] != 'None' else None)
+                       if run_options['--curriculum'] != 'None' else None)
     lesson = int(run_options['--lesson'])
     fast_simulation = not bool(run_options['--slow'])
     no_graphics = run_options['--no-graphics']
@@ -113,7 +113,8 @@ def main():
         if seed == -1:
             run_seed = np.random.randint(0, 10000)
         process_queue = Queue()
-        p = Process(target=run_training, args=(i, run_seed, options, process_queue))
+        p = Process(target=run_training, args=(
+            i, run_seed, options, process_queue))
         jobs.append(p)
         p.start()
         # Wait for signal that environment has successfully launched
