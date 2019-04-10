@@ -11,7 +11,7 @@ from PIL import Image
 
 logger = logging.getLogger("mlagents.envs")
 
-headers = {"X-Api-Key": "da2-rbxq3r664bapfeghuz2znft5r4",
+headers = {"X-Api-Key": "da2-i732yxi7qng65jnaphvfsyozqu",
            "Content-Type": "application/json"}
 
 episodePostQuery = string.Template(
