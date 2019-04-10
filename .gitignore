@@ -76,7 +76,7 @@
 *.egg-info*
 *.eggs*
 *.gitignore.swp
-./api/flask/*
+api/flask/
 
 # VSCode hidden files
 *.vscode/

@@ -12,11 +12,14 @@ app = Flask(__name__)
 def execute():
     if request.method == 'GET':
         print('Started executing command')
+        run_id = 0
+        seed_id = 4446
+        queue = Queue()
         options = {
             '--api-connection': True,
             '--curriculum': 'None',
             '--docker-target-name': 'None',
-            '--env': 'None',
+            '--env': '../newborn-training.0.2.app',
             '--help': False,
             '--keep-checkpoints': '5',
             '--lesson': '0',
@@ -31,7 +34,7 @@ def execute():
             '--worker-id': '0',
             '<trainer-config-path>': '../config/trainer_config.yaml'
         }
-        run_training(0, 4445, options, Queue())
+        run_training(run_id, seed_id, options, queue)
     return "not executed"
 
 
