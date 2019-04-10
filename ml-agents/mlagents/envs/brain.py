@@ -11,20 +11,6 @@ from PIL import Image
 
 logger = logging.getLogger("mlagents.envs")
 
-headers = {"X-Api-Key": "da2-i732yxi7qng65jnaphvfsyozqu",
-           "Content-Type": "application/json"}
-
-episodePostQuery = string.Template(
-    """
-  mutation {
-  createEpisode(input: {
-        id: "$uuid", episodeModelId: "$id"
-      }) {
-        id
-        }
-    }
-"""
-)
 
 episodeid = ""
 
@@ -141,10 +127,6 @@ class BrainParameters:
             "discrete", "continuous"][vector_action_space_type]
         self.episode_id = episode_id
 
-        episode_uuid = uuid.uuid4().hex
-        if api_connection:
-            self.post_episode(self, self.brain_name, self.brain_name)
-
     def __str__(self):
         return '''Unity brain name: {}
         Number of Visual Observations (per agent): {}
@@ -183,16 +165,3 @@ class BrainParameters:
                                        episodeid,
                                        api_connection)
         return brain_params
-
-    @staticmethod
-    def post_episode(self, brain_id, uuid):
-        request = requests.post('https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql',
-                                json={'query': episodePostQuery.substitute(id=brain_id, uuid=uuid)}, headers=headers)
-        if request.status_code == 200:
-            if "errors" in request.json():
-                raise UnityEnvironmentException(request.json()["errors"])
-            else:
-                return request.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodePostQuery.substitute(id=brain_id, uuid=uuid)))

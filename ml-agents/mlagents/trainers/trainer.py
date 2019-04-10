@@ -3,13 +3,17 @@ import logging
 
 import tensorflow as tf
 import numpy as np
+import uuid
 
 import string
 import requests
+from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.brain import BrainParameters
 from mlagents.envs import UnityException, AllBrainInfo
 
 logger = logging.getLogger("mlagents.trainers")
+
+api_url = 'https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql'
 
 headers = {"X-Api-Key": "da2-i732yxi7qng65jnaphvfsyozqu",
            "Content-Type": "application/json"}
@@ -18,12 +22,25 @@ episodeSetQuery = string.Template(
     """
   mutation {
   createSummary(input: {
-      meanReward: $meanReward, standardReward: $standardReward, step: $step, summaryEpisodeId: $brainName
+        meanReward: $meanReward, standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
     }) {
       meanReward
       standardReward
+      step
     }
   }
+"""
+)
+
+episodePostQuery = string.Template(
+    """
+  mutation {
+  createEpisode(input: {
+        id: "$uuid", episodeModelId: "$id"
+      }) {
+        id
+        }
+    }
 """
 )
 
@@ -189,6 +206,12 @@ class Trainer(object):
         :param lesson_num: Current lesson number in curriculum.
         :param global_step: The number of steps the simulation has been going for
         """
+        if global_step == 0 and api_connection:
+            episode_uuid = uuid.uuid4().hex
+            print(episode_uuid)
+            self.episode_uuid = episode_uuid
+            self.post_episode(self, self.brain_name, episode_uuid)
+
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
             if len(self.stats['Environment/Cumulative Reward']) > 0:
@@ -198,6 +221,7 @@ class Trainer(object):
                     self.stats['Environment/Cumulative Reward'])
 
                 if api_connection:
+                    print(self.episode_uuid)
                     self.post_episode_set(
                         self, min(self.get_step, self.get_max_steps), mean_reward, std_reward)
 
@@ -247,11 +271,24 @@ class Trainer(object):
 
     @staticmethod
     def post_episode_set(self, step, mean_rewards, std_rewards):
-        request = requests.post('https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql', json={
-                                'query': episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards, step=step, brainName=self.brain_name)}, headers=headers)
+        request = requests.post(api_url, json={
+                                'query': episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)}, headers=headers)
         if request.status_code == 200:
             print(request.json())
             return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards)))
+                request.status_code, episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards, step=step, brainName=self.episode_uuid)))
+
+    @staticmethod
+    def post_episode(self, brain_id, uuid):
+        request = requests.post(api_url,
+                                json={'query': episodePostQuery.substitute(id=brain_id, uuid=uuid)}, headers=headers)
+        if request.status_code == 200:
+            if "errors" in request.json():
+                raise UnityEnvironmentException(request.json()["errors"])
+            else:
+                return request.json()
+        else:
+            raise Exception("Query failed to run by returning code of {}. {}".format(
+                request.status_code, episodePostQuery.substitute(id=brain_id, uuid=uuid)))
