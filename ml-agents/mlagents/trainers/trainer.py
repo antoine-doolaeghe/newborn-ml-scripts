@@ -6,7 +6,7 @@ import numpy as np
 import uuid
 
 import string
-import requests
+# import requests
 from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.brain import BrainParameters
 from mlagents.envs import UnityException, AllBrainInfo

@@ -1,7 +1,6 @@
 import logging
 import numpy as np
 import io
-import requests
 import string
 import uuid
 

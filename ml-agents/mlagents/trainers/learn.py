@@ -45,7 +45,6 @@ def run_training(sub_id, run_seed, run_options, process_queue):
                            load_model, train_model, worker_id + sub_id,
                            keep_checkpoints, lesson, run_seed,
                            docker_target_name, trainer_config_path, no_graphics, api_connection)
-
     # Signal that environment has been launched.
     process_queue.put(True)
 

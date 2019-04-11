@@ -6,7 +6,7 @@ import os
 import glob
 import logging
 import shutil
-import requests
+# import requests
 
 import yaml
 import re
@@ -69,7 +69,7 @@ class TrainerController(object):
             self.trainer_config_path = \
                 '/{docker_target_name}/{trainer_config_path}'.format(
                     docker_target_name=docker_target_name,
-                    trainer_config_path = trainer_config_path)
+                    trainer_config_path=trainer_config_path)
             self.model_path = '/{docker_target_name}/models/{run_id}'.format(
                 docker_target_name=docker_target_name,
                 run_id=run_id)
@@ -160,10 +160,10 @@ class TrainerController(object):
         if self.meta_curriculum:
             brain_names_to_measure_vals = {}
             for brain_name, curriculum \
-                in self.meta_curriculum.brains_to_curriculums.items():
+                    in self.meta_curriculum.brains_to_curriculums.items():
                 if curriculum.measure == 'progress':
                     measure_val = (self.trainers[brain_name].get_step /
-                        self.trainers[brain_name].get_max_steps)
+                                   self.trainers[brain_name].get_max_steps)
                     brain_names_to_measure_vals[brain_name] = measure_val
                 elif curriculum.measure == 'reward':
                     measure_val = np.mean(self.trainers[brain_name]
@@ -173,7 +173,7 @@ class TrainerController(object):
         else:
             return None
 
-    def _save_model(self,api_connection,steps=0):
+    def _save_model(self, api_connection, steps=0):
         """
         Saves current model to checkpoint folder.
         :param steps: Current number of steps in training process.
@@ -297,13 +297,13 @@ class TrainerController(object):
                 trainer.write_tensorboard_text('Hyperparameters',
                                                trainer.parameters)
         try:
-            while any([t.get_step <= t.get_max_steps \
+            while any([t.get_step <= t.get_max_steps
                        for k, t in self.trainers.items()]) \
-                  or not self.train_model:
+                    or not self.train_model:
                 if self.meta_curriculum:
                     # Get the sizes of the reward buffers.
-                    reward_buff_sizes = {k:len(t.reward_buffer) \
-                                        for (k,t) in self.trainers.items()}
+                    reward_buff_sizes = {k: len(t.reward_buffer)
+                                         for (k, t) in self.trainers.items()}
                     # Attempt to increment the lessons of the brains who
                     # were ready.
                     lessons_incremented = \
@@ -328,10 +328,10 @@ class TrainerController(object):
 
                 # Decide and take an action
                 take_action_vector, \
-                take_action_memories, \
-                take_action_text, \
-                take_action_value, \
-                take_action_outputs \
+                    take_action_memories, \
+                    take_action_text, \
+                    take_action_value, \
+                    take_action_outputs \
                     = {}, {}, {}, {}, {}
                 for brain_name, trainer in self.trainers.items():
                     (take_action_vector[brain_name],
@@ -358,8 +358,8 @@ class TrainerController(object):
                             global_step,
                             api_connection,
                             lesson_num=self.meta_curriculum
-                                .brains_to_curriculums[brain_name]
-                                .lesson_num)
+                            .brains_to_curriculums[brain_name]
+                            .lesson_num)
                     else:
                         trainer.write_summary(global_step, api_connection)
                     if self.train_model \
