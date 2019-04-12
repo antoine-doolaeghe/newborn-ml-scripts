@@ -27,7 +27,7 @@ class TrainerController(object):
     def __init__(self, env_path, run_id, save_freq, curriculum_folder,
                  fast_simulation, load, train, worker_id, keep_checkpoints,
                  lesson, seed, docker_target_name,
-                 trainer_config_path, no_graphics, api_connection):
+                 trainer_config_path, no_graphics, newborn_id, api_connection):
         """
         :param env_path: Location to the environment executable to be loaded.
         :param run_id: The sub-directory name for model and summary statistics
@@ -111,6 +111,7 @@ class TrainerController(object):
                                     seed=self.seed,
                                     docker_training=self.docker_training,
                                     no_graphics=no_graphics,
+                                    newborn_id=newborn_id,
                                     api_connection=api_connection)
         if env_path is None:
             self.env_name = 'editor_' + self.env.academy_name

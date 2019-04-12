@@ -13,6 +13,7 @@
 # Tensorflow Model Info
 */models
 */summaries
+/unity-volume
 
 # Training environments
 /envs
