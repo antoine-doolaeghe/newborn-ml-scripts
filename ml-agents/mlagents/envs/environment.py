@@ -42,6 +42,7 @@ class UnityEnvironment(object):
 
         atexit.register(self._close)
         self.port = base_port + worker_id
+        self.newborn_id = newborn_id
         self._buffer_size = 12000
         self._version_ = "API-6"
         self._loaded = False  # If true, this means the environment was successfully loaded
@@ -184,10 +185,11 @@ class UnityEnvironment(object):
                 if no_graphics:
                     self.proc1 = subprocess.Popen(
                         [launch_string, '-nographics', '-batchmode',
-                         '--port', str(self.port)])
+                         '--port', str(self.port), str(self.newborn_id)])
                 else:
+                    print(str(self.port))
                     self.proc1 = subprocess.Popen(
-                        [launch_string, '--port', str(self.port)])
+                        [launch_string, '--port', str(self.port), str(self.newborn_id)])
             else:
                 """
                 Comments for future maintenance:

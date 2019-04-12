@@ -94,6 +94,7 @@ def main():
       --worker-id=<n>            Number to add to communication port (5005) [default: 0].
       --docker-target-name=<dt>  Docker volume to store training-specific files [default: None].
       --no-graphics              Whether to run the environment in no-graphics mode [default: False].
+      --newborn-id=<n>        Whether to run the environment in no-graphics mode [default: False].
       --api-connection         Whether to run the environment in no-graphics mode [default: False].
     '''
 
