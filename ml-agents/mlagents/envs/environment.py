@@ -185,11 +185,10 @@ class UnityEnvironment(object):
                 if no_graphics:
                     self.proc1 = subprocess.Popen(
                         [launch_string, '-nographics', '-batchmode',
-                         '--port', str(self.port), str(self.newborn_id)])
+                         '--port', str(self.port), '--newborn-id', str(self.newborn_id)])
                 else:
-                    print(str(self.port))
                     self.proc1 = subprocess.Popen(
-                        [launch_string, '--port', str(self.port), str(self.newborn_id)])
+                        [launch_string, '--port', str(self.port), '--newborn-id', str(self.newborn_id)])
             else:
                 """
                 Comments for future maintenance:
