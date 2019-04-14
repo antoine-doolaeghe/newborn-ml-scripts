@@ -29,10 +29,7 @@ jobs:
 
       - run:
           name: install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
+          command: pip install -r requirements.txt
 
       - save_cache:
           paths:
@@ -46,8 +43,7 @@ jobs:
       # https://nose.readthedocs.io
       - run:
           name: run tests
-          command: |
-            pytest
+          command: pytest
 
       - store_artifacts:
           path: test-reports
