@@ -208,7 +208,6 @@ class Trainer(object):
         """
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
-            print(episode_uuid)
             self.episode_uuid = episode_uuid
             self.post_episode(self, self.brain_name, episode_uuid)
 

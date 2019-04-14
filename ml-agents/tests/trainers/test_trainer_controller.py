@@ -140,7 +140,7 @@ def test_initialization(mock_communicator, mock_launcher):
     mock_communicator.return_value = MockCommunicator(
         discrete_action=True, visual_inputs=1)
     tc = TrainerController(' ', ' ', 1, None, True, True, False, 1,
-                           1, 1, 1, '', "tests/test_mlagents.trainers.py", False)
+                           1, 1, 1, '', "tests/test_mlagents.trainers.py", False, 1234, False)
     assert (tc.env.brain_names[0] == 'RealFakeBrain')
 
 
@@ -155,7 +155,7 @@ def test_load_config(mock_communicator, mock_launcher, dummy_config):
                 discrete_action=True, visual_inputs=1)
             mock_load.return_value = dummy_config
             tc = TrainerController(' ', ' ', 1, None, True, True, False, 1,
-                                   1, 1, 1, '', '', False)
+                                   1, 1, 1, '', '', False, 1234, False)
             config = tc._load_config()
             assert (len(config) == 1)
             assert (config['default']['trainer'] == "ppo")
@@ -172,7 +172,7 @@ def test_initialize_trainers(mock_communicator, mock_launcher, dummy_config,
                 discrete_action=True, visual_inputs=1)
             tc = TrainerController(' ', ' ', 1, None, True, False, False, 1, 1,
                                    1, 1, '', "tests/test_mlagents.trainers.py",
-                                   False)
+                                   False, 1234, False)
 
             # Test for PPO trainer
             mock_load.return_value = dummy_config
@@ -200,7 +200,7 @@ def test_initialize_trainers(mock_communicator, mock_launcher, dummy_config,
 @mock.patch('mlagents.envs.UnityEnvironment.executable_launcher')
 @mock.patch('mlagents.envs.UnityEnvironment.get_communicator')
 def test_initialize_offline_trainers(mock_communicator, mock_launcher, dummy_config,
-                             dummy_offline_bc_config, dummy_online_bc_config, dummy_bad_config):
+                                     dummy_offline_bc_config, dummy_online_bc_config, dummy_bad_config):
     open_name = 'mlagents.trainers.trainer_controller' + '.open'
     with mock.patch('yaml.load') as mock_load:
         with mock.patch(open_name, create=True) as _:
@@ -209,7 +209,7 @@ def test_initialize_offline_trainers(mock_communicator, mock_launcher, dummy_con
                 brain_name="Ball3DBrain", vec_obs_size=8)
             tc = TrainerController(' ', ' ', 1, None, True, False, False, 1, 1,
                                    1, 1, '', "tests/test_mlagents.trainers.py",
-                                   False)
+                                   False, 1234, False)
 
             # Test for Offline Behavior Cloning Trainer
             mock_load.return_value = dummy_offline_bc_config
