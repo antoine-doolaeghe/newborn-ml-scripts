@@ -43,3 +43,15 @@ docker run --name test3 --mount type=bind,source="\$(pwd)"/unity-volume,target=/
 4/ The flask use the Unity build execute method to generate the newborn agent/brain/vector etc.
 
 5/ The training flows.
+
+---
+
+Usefull docker command for this project:
+
+Create a docker container => docker build -t ml-agent .
+
+List All all imgages => docker ps -a -q
+
+Follow a launched images => docker logs --follow d3a4f72085b4
+
+Delete all launched images => docker rm -f \$(docker ps -a -q)

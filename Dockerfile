@@ -124,6 +124,7 @@ RUN apt-get install -y xvfb
 COPY ml-agents /ml-agents
 WORKDIR /ml-agents
 RUN pip install .
+RUN pip install requests
 
 # port 5005 is the port used in in Editor training.
 EXPOSE 5005
