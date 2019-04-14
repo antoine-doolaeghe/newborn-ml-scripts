@@ -9,3 +9,4 @@ pyyaml
 requests
 protobuf<3.7,>=3.6
 grpcio<1.12.0,>=1.11.0
+zappa
