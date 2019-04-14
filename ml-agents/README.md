@@ -46,6 +46,8 @@ docker run --name test3 --mount type=bind,source="\$(pwd)"/unity-volume,target=/
 
 ---
 
+Run the training locally => mlagents-learn trainer_config.yaml --train --newborn-id=00498364502827423045832 --api-connection
+
 Usefull docker command for this project:
 
 Create a docker container => docker build -t ml-agent .
