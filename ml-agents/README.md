@@ -57,3 +57,7 @@ List All all imgages => docker ps -a -q
 Follow a launched images => docker logs --follow d3a4f72085b4
 
 Delete all launched images => docker rm -f \$(docker ps -a -q)
+
+connect to ec2 => ssh -i ec2-test.pem ubuntu@ec2-34-205-63-195.compute-1.amazonaws.com
+
+upload to ec2: scp -i ec2-test.pem newborn_communicator_api/unity-volume/newborn-lin.x86_64 ubuntu@ec2-34-205-63-195.compute-1.amazonaws.com:

@@ -13,7 +13,7 @@
 # Tensorflow Model Info
 */models
 */summaries
-*/unity-volume/newborn-lin_Data/*
+*/newborn-lin_Data
 
 # Training environments
 /envs
