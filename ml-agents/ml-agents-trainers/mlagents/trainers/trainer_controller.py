@@ -36,7 +36,6 @@ class TrainerController(object):
                  external_brains: Dict[str, BrainParameters],
                  training_seed: int,
                  fast_simulation: bool,
-                 newborn_id,
                  api_connection):
         """
         :param model_path: Path to save the model.

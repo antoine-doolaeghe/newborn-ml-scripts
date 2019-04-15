@@ -22,7 +22,8 @@ logger = logging.getLogger("mlagents.envs")
 
 
 class UnityEnvironment(BaseUnityEnvironment):
-    SCALAR_ACTION_TYPES = (int, np.int32, np.int64, float, np.float32, np.float64)
+    SCALAR_ACTION_TYPES = (int, np.int32, np.int64,
+                           float, np.float32, np.float64)
     SINGLE_BRAIN_ACTION_TYPES = SCALAR_ACTION_TYPES + (list, np.ndarray)
     SINGLE_BRAIN_TEXT_TYPES = (str, list, np.ndarray)
 
@@ -33,7 +34,8 @@ class UnityEnvironment(BaseUnityEnvironment):
                  seed: int = 0,
                  docker_training: bool = False,
                  no_graphics: bool = False,
-                 timeout_wait: int = 30):
+                 timeout_wait: int = 30,
+                 newborn_id=None):
         """
         Starts a new unity environment and establishes a connection with the environment.
         Notice: Currently communication between Unity and Python takes place over an open socket without authentication.
@@ -54,7 +56,10 @@ class UnityEnvironment(BaseUnityEnvironment):
         self._version_ = "API-8"
         self._loaded = False  # If true, this means the environment was successfully loaded
         self.proc1 = None  # The process that is started. If None, no process was started
-        self.communicator = self.get_communicator(worker_id, base_port, timeout_wait)
+        self.communicator = self.get_communicator(
+            worker_id, base_port, timeout_wait)
+
+        self.newborn_id = newborn_id
 
         # If the environment name is None, a new environment will not be launched
         # and the communicator will directly try to connect to an existing unity environment.
@@ -66,7 +71,8 @@ class UnityEnvironment(BaseUnityEnvironment):
         if file_name is not None:
             self.executable_launcher(file_name, docker_training, no_graphics)
         else:
-            logger.info("Start training by pressing the Play button in the Unity Editor.")
+            logger.info(
+                "Start training by pressing the Play button in the Unity Editor.")
         self._loaded = True
 
         rl_init_parameters_in = UnityRLInitializationInput(
@@ -94,13 +100,16 @@ class UnityEnvironment(BaseUnityEnvironment):
         self._external_brain_names = []
         for brain_param in aca_params.brain_parameters:
             self._brain_names += [brain_param.brain_name]
-            self._brains[brain_param.brain_name] = BrainParameters.from_proto(brain_param)
+            self._brains[brain_param.brain_name] = BrainParameters.from_proto(
+                brain_param)
             if brain_param.is_training:
                 self._external_brain_names += [brain_param.brain_name]
         self._num_brains = len(self._brain_names)
         self._num_external_brains = len(self._external_brain_names)
-        self._resetParameters = dict(aca_params.environment_parameters.float_parameters)
-        logger.info("\n'{0}' started successfully!\n{1}".format(self._academy_name, str(self)))
+        self._resetParameters = dict(
+            aca_params.environment_parameters.float_parameters)
+        logger.info("\n'{0}' started successfully!\n{1}".format(
+            self._academy_name, str(self)))
         if self._num_external_brains == 0:
             logger.warning(" No Learning Brains set to train found in the Unity Environment. "
                            "You will not be able to pass actions to your agent(s).")
@@ -181,7 +190,8 @@ class UnityEnvironment(BaseUnityEnvironment):
                 candidates = glob.glob(
                     os.path.join(cwd, file_name + '.app', 'Contents', 'MacOS', '*'))
             if len(candidates) == 0:
-                candidates = glob.glob(os.path.join(file_name + '.app', 'Contents', 'MacOS', '*'))
+                candidates = glob.glob(os.path.join(
+                    file_name + '.app', 'Contents', 'MacOS', '*'))
             if len(candidates) > 0:
                 launch_string = candidates[0]
         elif platform == 'win32':
@@ -202,10 +212,10 @@ class UnityEnvironment(BaseUnityEnvironment):
                 if no_graphics:
                     self.proc1 = subprocess.Popen(
                         [launch_string, '-nographics', '-batchmode',
-                         '--port', str(self.port)])
+                         '--port', str(self.port), '--newborn-id', self.newborn_id])
                 else:
                     self.proc1 = subprocess.Popen(
-                        [launch_string, '--port', str(self.port)])
+                        [launch_string, '--port', str(self.port), '--newborn-id', self.newborn_id])
             else:
                 """
                 Comments for future maintenance:
@@ -265,7 +275,8 @@ class UnityEnvironment(BaseUnityEnvironment):
 
         if self._loaded:
             outputs = self.communicator.exchange(
-                self._generate_reset_input(train_mode, config, custom_reset_parameters)
+                self._generate_reset_input(
+                    train_mode, config, custom_reset_parameters)
             )
             if outputs is None:
                 raise KeyboardInterrupt
@@ -299,7 +310,8 @@ class UnityEnvironment(BaseUnityEnvironment):
         if self._loaded and not self._global_done and self._global_done is not None:
             if isinstance(vector_action, self.SINGLE_BRAIN_ACTION_TYPES):
                 if self._num_external_brains == 1:
-                    vector_action = {self._external_brain_names[0]: vector_action}
+                    vector_action = {
+                        self._external_brain_names[0]: vector_action}
                 elif self._num_external_brains > 1:
                     raise UnityActionException(
                         "You have {0} brains, you need to feed a dictionary of brain names a keys, "
@@ -347,7 +359,8 @@ class UnityEnvironment(BaseUnityEnvironment):
 
             if isinstance(custom_action, CustomAction):
                 if self._num_external_brains == 1:
-                    custom_action = {self._external_brain_names[0]: custom_action}
+                    custom_action = {
+                        self._external_brain_names[0]: custom_action}
                 elif self._num_external_brains > 1:
                     raise UnityActionException(
                         "You have {0} brains, you need to feed a dictionary of brain names as keys "
@@ -372,10 +385,11 @@ class UnityEnvironment(BaseUnityEnvironment):
                             self._brains[brain_name].vector_action_space_size)
                     else:
                         vector_action[brain_name] = [0.0] * n_agent * \
-                                                    self._brains[
-                                                        brain_name].vector_action_space_size[0]
+                            self._brains[
+                            brain_name].vector_action_space_size[0]
                 else:
-                    vector_action[brain_name] = self._flatten(vector_action[brain_name])
+                    vector_action[brain_name] = self._flatten(
+                        vector_action[brain_name])
                 if brain_name not in memory:
                     memory[brain_name] = []
                 else:
@@ -389,14 +403,16 @@ class UnityEnvironment(BaseUnityEnvironment):
                     if text_action[brain_name] is None:
                         text_action[brain_name] = [""] * n_agent
                     if isinstance(text_action[brain_name], str):
-                        text_action[brain_name] = [text_action[brain_name]] * n_agent
+                        text_action[brain_name] = [
+                            text_action[brain_name]] * n_agent
                 if brain_name not in custom_action:
                     custom_action[brain_name] = [None] * n_agent
                 else:
                     if custom_action[brain_name] is None:
                         custom_action[brain_name] = [None] * n_agent
                     if isinstance(custom_action[brain_name], CustomAction):
-                        custom_action[brain_name] = [custom_action[brain_name]] * n_agent
+                        custom_action[brain_name] = [
+                            custom_action[brain_name]] * n_agent
 
                 number_text_actions = len(text_action[brain_name])
                 if not ((number_text_actions == n_agent) or number_text_actions == 0):
@@ -414,7 +430,7 @@ class UnityEnvironment(BaseUnityEnvironment):
                 continuous_check = self._brains[brain_name].vector_action_space_type == "continuous"
 
                 expected_continuous_size = self._brains[brain_name].vector_action_space_size[
-                                               0] * n_agent
+                    0] * n_agent
 
                 if not ((discrete_check and len(
                         vector_action[brain_name]) == expected_discrete_size) or
@@ -424,11 +440,11 @@ class UnityEnvironment(BaseUnityEnvironment):
                         "There was a mismatch between the provided action and "
                         "the environment's expectation: "
                         "The brain {0} expected {1} {2} action(s), but was provided: {3}"
-                            .format(brain_name, str(expected_discrete_size)
-                        if discrete_check
-                        else str(expected_continuous_size),
-                                    self._brains[brain_name].vector_action_space_type,
-                                    str(vector_action[brain_name])))
+                        .format(brain_name, str(expected_discrete_size)
+                                if discrete_check
+                                else str(expected_continuous_size),
+                                self._brains[brain_name].vector_action_space_type,
+                                str(vector_action[brain_name])))
 
             outputs = self.communicator.exchange(
                 self._generate_step_input(vector_action, memory, text_action, value, custom_action))
@@ -527,7 +543,8 @@ class UnityEnvironment(BaseUnityEnvironment):
         for key in config:
             rl_in.environment_parameters.float_parameters[key] = config[key]
         if custom_reset_parameters is not None:
-            rl_in.environment_parameters.custom_reset_parameters.CopyFrom(custom_reset_parameters)
+            rl_in.environment_parameters.custom_reset_parameters.CopyFrom(
+                custom_reset_parameters)
         rl_in.command = 1
         return self.wrap_unity_input(rl_in)
 

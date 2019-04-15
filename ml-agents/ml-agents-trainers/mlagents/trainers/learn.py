@@ -79,7 +79,8 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
         docker_target_name,
         no_graphics,
         run_seed,
-        base_port + (sub_id * num_envs)
+        base_port + (sub_id * num_envs),
+        newborn_id,
     )
     env = SubprocessUnityEnvironment(env_factory, num_envs)
     maybe_meta_curriculum = try_create_meta_curriculum(curriculum_folder, env)
@@ -89,8 +90,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
                            save_freq, maybe_meta_curriculum,
                            load_model, train_model,
                            keep_checkpoints, lesson, env.external_brains,
-                           run_seed, fast_simulation,
-                           newborn_id, api_connection)
+                           run_seed, fast_simulation, api_connection)
 
     # Signal that environment has been launched.
     process_queue.put(True)
@@ -160,7 +160,8 @@ def create_environment_factory(
         docker_target_name: str,
         no_graphics: bool,
         seed: Optional[int],
-        start_port: int
+        start_port: int,
+        newborn_id: int
 ) -> Callable[[int], BaseUnityEnvironment]:
     if env_path is not None:
         # Strip out executable extensions if passed
@@ -194,7 +195,8 @@ def create_environment_factory(
             seed=env_seed,
             docker_training=docker_training,
             no_graphics=no_graphics,
-            base_port=start_port
+            base_port=start_port,
+            newborn_id=newborn_id,
         )
     return create_unity_environment
 
@@ -242,7 +244,7 @@ def main():
       --docker-target-name=<dt>  Docker volume to store training-specific files [default: None].
       --no-graphics              Whether to run the environment in no-graphics mode [default: False].
       --debug                    Whether to run ML-Agents in debug mode with detailed logging [default: False].
-      --api-connection=<n>       Connect api 
+      --api-connection           Connect api 
       --newborn-id=<n>           Newborn id
     '''
 
