@@ -216,7 +216,7 @@ class BrainParameters:
                                                  ', '.join(self.vector_action_descriptions))
 
     @staticmethod
-    def from_proto(brain_param_proto, api_connection):
+    def from_proto(brain_param_proto):
         """
         Converts brain parameter proto to BrainParameter object.
         :param brain_param_proto: protobuf object.
@@ -234,6 +234,5 @@ class BrainParameters:
                                        list(brain_param_proto.vector_action_size),
                                        list(
                                            brain_param_proto.vector_action_descriptions),
-                                       brain_param_proto.vector_action_space_type,
-                                       api_connection)
+                                       brain_param_proto.vector_action_space_type)
         return brain_params
