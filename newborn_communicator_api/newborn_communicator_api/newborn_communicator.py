@@ -18,11 +18,11 @@ def execute():
         print(newborn_id)
         print('Started executing command')
         process = subprocess.Popen(["docker", "run", "-d", "--mount",
-                                    "type=bind,source=/Users/antoine.doolaeghe/Documents/NewBorn/NewBorn-ml/api/unity-volume,target=/unity-volume",
+                                    "type=bind,source=/Users/antoine.doolaeghe/Documents/NewBorn/NewBorn-ml/ml-agents/unity-volume,target=/unity-volume",
                                     "-p", "5005:5005",
                                     "ml-agent:latest",
                                     "--docker-target-name=unity-volume",
-                                    "trainer_config.yaml",
+                                    "config/trainer_config.yaml",
                                     "--env=newborn-lin",
                                     "--train",
                                     "--run-id=1",

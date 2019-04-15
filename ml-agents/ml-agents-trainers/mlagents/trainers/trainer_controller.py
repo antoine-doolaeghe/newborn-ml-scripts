@@ -50,7 +50,7 @@ class TrainerController(object):
         :param external_brains: dictionary of external brain names to BrainInfo objects.
         :param training_seed: Seed to use for Numpy and Tensorflow random number generation.
         """
-
+        self.api_connection = api_connection
         self.model_path = model_path
         self.summaries_dir = summaries_dir
         self.external_brains = external_brains
@@ -302,11 +302,12 @@ class TrainerController(object):
             if self.meta_curriculum is not None:
                 trainer.write_summary(
                     self.global_step,
-                    delta_train_start, lesson_num=self.meta_curriculum
+                    delta_train_start, self.api_connection, lesson_num=self.meta_curriculum
                     .brains_to_curriculums[brain_name]
                     .lesson_num)
             else:
-                trainer.write_summary(self.global_step, delta_train_start)
+                trainer.write_summary(
+                    self.global_step, delta_train_start, self.api_connection)
             if self.train_model \
                     and trainer.get_step <= trainer.get_max_steps:
                 trainer.increment_step_and_update_last_reward()
