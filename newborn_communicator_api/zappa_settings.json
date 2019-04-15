@@ -1,0 +1,11 @@
+{
+  "dev": {
+    "app_function": "newborn_communicator_api.app",
+    "aws_region": "eu-west-1",
+    "profile_name": "default",
+    "project_name": "newborn-communi",
+    "runtime": "python3.6",
+    "s3_bucket": "zappa-4mawlinfq",
+    "slim_handler": true
+  }
+}

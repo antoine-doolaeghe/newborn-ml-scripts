@@ -6,6 +6,11 @@ import urllib.parse
 app = Flask(__name__)
 
 
+@app.route("/", methods=['GET'])
+def hello():
+    return "Hello welcome to the!"
+
+
 @app.route("/run", methods=['GET'])
 def execute():
     if request.method == 'GET':
