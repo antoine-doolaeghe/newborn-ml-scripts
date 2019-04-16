@@ -195,7 +195,7 @@ class Trainer(object):
         raise UnityTrainerException(
             "The update_model method was not implemented.")
 
-    def save_model(self, api_connection):
+    def save_model(self):
         """
         Saves the model
         """
