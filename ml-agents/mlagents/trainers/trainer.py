@@ -4,6 +4,7 @@ import os
 import tensorflow as tf
 import numpy as np
 import uuid
+import datetime
 
 import string
 import requests
@@ -17,17 +18,18 @@ LOGGER = logging.getLogger("mlagents.trainers")
 
 api_url = 'https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-i732yxi7qng65jnaphvfsyozqu",
+headers = {"X-Api-Key": "da2-smch6kbkszebtoawtoncrpmhmm",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
     """
   mutation {
   createSummary(input: {
-        meanReward: $meanReward, standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
+        meanReward: $meanReward, created: $created, standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
     }) {
       meanReward
       standardReward
+      created
       step
     }
   }
@@ -238,7 +240,7 @@ class Trainer(object):
                 if api_connection:
                     print(self.episode_uuid)
                     self.post_episode_set(
-                        self, min(self.get_step, self.get_max_steps), mean_reward, std_reward)
+                        self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
 
                 LOGGER.info(" {}: {}: Step: {}. "
                             "Time Elapsed: {:0.3f} s "
@@ -290,9 +292,9 @@ class Trainer(object):
         self.standard_rewards.append(standard_reward)
 
     @staticmethod
-    def post_episode_set(self, step, mean_rewards, std_rewards):
+    def post_episode_set(self, created, step, mean_rewards, std_rewards):
         request = requests.post(api_url, json={
-                                'query': episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)}, headers=headers)
+                                'query': episodeSetQuery.substitute(created=created, meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)}, headers=headers)
         if request.status_code == 200:
             print(request.json())
             return request.json()
