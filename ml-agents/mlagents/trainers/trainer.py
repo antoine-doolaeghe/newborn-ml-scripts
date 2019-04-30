@@ -18,14 +18,14 @@ LOGGER = logging.getLogger("mlagents.trainers")
 
 api_url = 'https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-smch6kbkszebtoawtoncrpmhmm",
+headers = {"X-Api-Key": "da2-2tazrlusczbivn3j72pxnikida",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
     """
   mutation {
   createSummary(input: {
-        meanReward: $meanReward, created: $created, standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
+        meanReward: $meanReward, created: "$created", standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
     }) {
       meanReward
       standardReward
@@ -40,7 +40,7 @@ episodePostQuery = string.Template(
     """
   mutation {
   createEpisode(input: {
-        id: "$uuid", episodeModelId: "$id"
+        id: "$uuid", created: "$created", episodeModelId: "$id"
       }) {
         id
         }
@@ -227,7 +227,8 @@ class Trainer(object):
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
-            self.post_episode(self, self.brain_name, episode_uuid)
+            self.post_episode(self, datetime.datetime.now(),
+                              self.brain_name, episode_uuid)
 
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
@@ -300,12 +301,12 @@ class Trainer(object):
             return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodeSetQuery.substitute(meanReward=mean_rewards, standardReward=std_rewards, step=step, brainName=self.episode_uuid)))
+                request.status_code, episodeSetQuery.substitute(created=created, meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)))
 
     @staticmethod
-    def post_episode(self, brain_id, uuid):
+    def post_episode(self, created, brain_id, uuid):
         request = requests.post(api_url,
-                                json={'query': episodePostQuery.substitute(id=brain_id, uuid=uuid)}, headers=headers)
+                                json={'query': episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)}, headers=headers)
         if request.status_code == 200:
             if "errors" in request.json():
                 raise UnityEnvironmentException(request.json()["errors"])
