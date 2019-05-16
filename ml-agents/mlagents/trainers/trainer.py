@@ -8,6 +8,8 @@ import datetime
 
 import string
 import requests
+import boto3
+
 
 from mlagents.envs import UnityException, AllBrainInfo, BrainInfo
 from mlagents.envs.exception import UnityEnvironmentException
@@ -47,6 +49,18 @@ episodePostQuery = string.Template(
     }
 """
 )
+
+# Create an SNS client
+sns = boto3.client('sns')
+
+# # Publish a simple message to the specified SNS topic
+# response = sns.publish(
+#     TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+#     Message='Hello World!',
+# )
+
+# # Print out the response
+# print(response)
 
 
 class UnityTrainerException(UnityException):

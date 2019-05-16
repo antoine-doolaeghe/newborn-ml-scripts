@@ -5,6 +5,7 @@ numpy<=1.14.5,>=1.13.3
 jupyter
 pytest<4.0.0,>=3.2.2
 docopt
+boto3
 pyyaml
 requests
 protobuf<3.7,>=3.6
