@@ -16,9 +16,9 @@ from mlagents.trainers import TrainerMetrics
 
 LOGGER = logging.getLogger("mlagents.trainers")
 
-api_url = 'https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql'
+api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-2tazrlusczbivn3j72pxnikida",
+headers = {"X-Api-Key": "da2-bwhkcmyrfvgqfccovxokq2btva",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
