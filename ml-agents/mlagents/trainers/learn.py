@@ -10,6 +10,8 @@ import numpy as np
 import yaml
 from docopt import docopt
 from typing import Optional, Callable
+import boto3
+import json
 
 
 from mlagents.trainers.trainer_controller import TrainerController
@@ -19,6 +21,10 @@ from mlagents.envs import UnityEnvironment
 from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.base_unity_environment import BaseUnityEnvironment
 from mlagents.envs.subprocess_environment import SubprocessUnityEnvironment
+
+
+# Create an SNS client
+sns = boto3.client('sns')
 
 
 def run_training(sub_id: int, run_seed: int, run_options, process_queue):
@@ -51,6 +57,12 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     trainer_config_path = run_options['<trainer-config-path>']
     api_connection = run_options['--api-connection']
     newborn_id = run_options['--newborn-id']
+    # send initialized sns message
+    sns.publish(
+        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+        Message=json.dumps(
+            {"newbornId": self.brain_name, "status": "training"}, ensure_ascii=False),
+    )
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
         model_path = './models/{run_id}-{sub_id}'.format(

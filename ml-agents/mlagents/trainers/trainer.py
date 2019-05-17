@@ -1,4 +1,5 @@
 # # Unity ML-Agents Toolkit
+import json
 import logging
 import os
 import tensorflow as tf
@@ -9,6 +10,7 @@ import datetime
 import string
 import requests
 import boto3
+import json
 
 
 from mlagents.envs import UnityException, AllBrainInfo, BrainInfo
@@ -52,15 +54,6 @@ episodePostQuery = string.Template(
 
 # Create an SNS client
 sns = boto3.client('sns')
-
-# # Publish a simple message to the specified SNS topic
-# response = sns.publish(
-#     TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-#     Message='Hello World!',
-# )
-
-# # Print out the response
-# print(response)
 
 
 class UnityTrainerException(UnityException):
@@ -243,6 +236,11 @@ class Trainer(object):
             self.episode_uuid = episode_uuid
             self.post_episode(self, datetime.datetime.now(),
                               self.brain_name, episode_uuid)
+            sns.publish(
+                TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+                Message=json.dumps(
+                    {"newbornId": self.brain_name, "status": "training"}, ensure_ascii=False),
+            )
 
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
