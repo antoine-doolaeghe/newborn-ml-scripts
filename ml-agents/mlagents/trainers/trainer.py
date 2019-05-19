@@ -230,17 +230,16 @@ class Trainer(object):
         :param lesson_num: Current lesson number in curriculum.
         :param global_step: The number of steps the simulation has been going for
         """
-
+        sns.publish(
+            TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+            Message=json.dumps(
+                {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+        )
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
             self.post_episode(self, datetime.datetime.now(),
                               self.brain_name, episode_uuid)
-            sns.publish(
-                TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-                Message=json.dumps(
-                    {"newbornId": self.brain_name, "status": "training"}, ensure_ascii=False),
-            )
 
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."

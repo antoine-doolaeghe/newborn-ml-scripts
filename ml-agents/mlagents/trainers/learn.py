@@ -24,7 +24,7 @@ from mlagents.envs.subprocess_environment import SubprocessUnityEnvironment
 
 
 # Create an SNS client
-sns = boto3.client('sns')
+sns = boto3.client('sns', region_name='eu-west-1')
 
 
 def run_training(sub_id: int, run_seed: int, run_options, process_queue):
@@ -61,7 +61,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     sns.publish(
         TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
         Message=json.dumps(
-            {"newbornId": self.brain_name, "status": "training"}, ensure_ascii=False),
+            {"newbornId": newborn_id, "status": "init"}, ensure_ascii=False),
     )
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
