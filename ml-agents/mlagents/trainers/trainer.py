@@ -1,4 +1,5 @@
 # # Unity ML-Agents Toolkit
+import json
 import logging
 import os
 import tensorflow as tf
@@ -8,6 +9,9 @@ import datetime
 
 import string
 import requests
+import boto3
+import json
+
 
 from mlagents.envs import UnityException, AllBrainInfo, BrainInfo
 from mlagents.envs.exception import UnityEnvironmentException
@@ -16,9 +20,9 @@ from mlagents.trainers import TrainerMetrics
 
 LOGGER = logging.getLogger("mlagents.trainers")
 
-api_url = 'https://ilhzglf4sfgepcagdzuviwewy4.appsync-api.eu-west-1.amazonaws.com/graphql'
+api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-2tazrlusczbivn3j72pxnikida",
+headers = {"X-Api-Key": "da2-bwhkcmyrfvgqfccovxokq2btva",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
@@ -47,6 +51,9 @@ episodePostQuery = string.Template(
     }
 """
 )
+
+# Create an SNS client
+sns = boto3.client('sns')
 
 
 class UnityTrainerException(UnityException):
@@ -223,7 +230,11 @@ class Trainer(object):
         :param lesson_num: Current lesson number in curriculum.
         :param global_step: The number of steps the simulation has been going for
         """
-
+        sns.publish(
+            TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+            Message=json.dumps(
+                {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+        )
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
