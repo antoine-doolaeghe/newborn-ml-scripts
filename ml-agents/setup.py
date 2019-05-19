@@ -4,15 +4,11 @@ from io import open
 
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
 
 setup(
     name='mlagents',
     version='0.8.1',
     description='Unity Machine Learning Agents',
-    long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/Unity-Technologies/ml-agents',
     author='Unity Technologies',
@@ -25,7 +21,8 @@ setup(
         'Programming Language :: Python :: 3.6'
     ],
 
-    packages=['mlagents.trainers', 'mlagents.trainers.bc', 'mlagents.trainers.ppo'],  # Required
+    packages=['mlagents.trainers', 'mlagents.trainers.bc',
+              'mlagents.trainers.ppo'],  # Required
     zip_safe=False,
 
     install_requires=[
