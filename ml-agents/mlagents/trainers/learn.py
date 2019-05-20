@@ -86,7 +86,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
             sub_id=sub_id)
         summaries_dir = '/{docker_target_name}/summaries'.format(
             docker_target_name=docker_target_name)
-     print("HERE12222")
+    print("HERE12222")
     trainer_config = load_config(trainer_config_path)
     env_factory = create_environment_factory(
         env_path,
@@ -108,7 +108,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
 
     # Signal that environment has been launched.
     process_queue.put(True)
-     print("HERE12www2")
+    print("HERE12www2")
     # Begin training
     tc.start_learning(env, trainer_config)
 
