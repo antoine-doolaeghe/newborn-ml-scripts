@@ -58,6 +58,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     api_connection = run_options['--api-connection']
     newborn_id = run_options['--newborn-id']
     # send initialized sns message
+    print("HERE111")
     sns.publish(
         TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
         Message=json.dumps(
