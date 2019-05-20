@@ -231,11 +231,11 @@ class Trainer(object):
         :param global_step: The number of steps the simulation has been going for
         """
         print("HELOO")
-        sns.publish(
-            TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-            Message=json.dumps(
-                {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
-        )
+        # sns.publish(
+        #     TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+        #     Message=json.dumps(
+        #         {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+        # )
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
