@@ -196,6 +196,7 @@ class TrainerController(object):
     def start_learning(self, env: BaseUnityEnvironment, trainer_config):
         # TODO: Should be able to start learning at different lesson numbers
         # for each curriculum.
+        print("HERE2222")
         if self.meta_curriculum is not None:
             self.meta_curriculum.set_all_curriculums_to_lesson_num(self.lesson)
         self._create_model_path(self.model_path)
