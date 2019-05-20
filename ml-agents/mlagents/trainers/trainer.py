@@ -230,6 +230,7 @@ class Trainer(object):
         :param lesson_num: Current lesson number in curriculum.
         :param global_step: The number of steps the simulation has been going for
         """
+        print("HELOO")
         sns.publish(
             TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
             Message=json.dumps(
