@@ -230,12 +230,6 @@ class Trainer(object):
         :param lesson_num: Current lesson number in curriculum.
         :param global_step: The number of steps the simulation has been going for
         """
-        print("HELOO")
-        # sns.publish(
-        #     TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-        #     Message=json.dumps(
-        #         {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
-        # )
         if global_step == 0 and api_connection:
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
@@ -251,6 +245,11 @@ class Trainer(object):
                     self.stats['Environment/Cumulative Reward'])
 
                 if api_connection:
+                    sns.publish(
+                        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+                        Message=json.dumps(
+                            {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+                    )
                     print(self.episode_uuid)
                     self.post_episode_set(
                         self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
