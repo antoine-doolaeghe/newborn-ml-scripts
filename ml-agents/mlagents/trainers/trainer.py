@@ -245,10 +245,11 @@ class Trainer(object):
                     self.stats['Environment/Cumulative Reward'])
 
                 if api_connection:
+                    # this could be a single message
                     sns.publish(
                         TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
                         Message=json.dumps(
-                            {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+                            {"newbornId": self.brain_name, "status": "Training" + str(global_step)}, ensure_ascii=False),
                     )
                     print(self.episode_uuid)
                     self.post_episode_set(

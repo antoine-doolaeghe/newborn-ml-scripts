@@ -58,15 +58,13 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     api_connection = run_options['--api-connection']
     newborn_id = run_options['--newborn-id']
     # send initialized sns message
-    print("HERE111")
     sns.publish(
         TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
         Message=json.dumps(
-            {"newbornId": newborn_id, "status": "init"}, ensure_ascii=False),
+            {"newbornId": newborn_id, "status": "Initializing"}, ensure_ascii=False),
     )
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
-        print("HERE121212")
         model_path = './models/{run_id}-{sub_id}'.format(
             run_id=run_id, sub_id=sub_id)
         summaries_dir = './summaries'
@@ -86,7 +84,6 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
             sub_id=sub_id)
         summaries_dir = '/{docker_target_name}/summaries'.format(
             docker_target_name=docker_target_name)
-    print("HERE12222")
     trainer_config = load_config(trainer_config_path)
     env_factory = create_environment_factory(
         env_path,
@@ -108,9 +105,13 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
 
     # Signal that environment has been launched.
     process_queue.put(True)
-    print("HERE12www2")
     # Begin training
     tc.start_learning(env, trainer_config)
+    sns.publish(
+        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
+        Message=json.dumps(
+            {"newbornId": newborn_id, "status": "Learning Started"}, ensure_ascii=False),
+    )
 
 
 def try_create_meta_curriculum(curriculum_folder: Optional[str], env: BaseUnityEnvironment) -> Optional[MetaCurriculum]:
