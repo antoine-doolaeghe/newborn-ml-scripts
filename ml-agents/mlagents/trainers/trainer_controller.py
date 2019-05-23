@@ -98,11 +98,13 @@ class TrainerController(object):
         for brain_name in self.trainers.keys():
             self.trainers[brain_name].save_model()
         self.logger.info('Saved Model')
+        # SEND THE MODEL TO AN S3 BUCKET
 
     def _save_model_when_interrupted(self, steps=0):
         self.logger.info('Learning was interrupted. Please wait '
                          'while the graph is generated.')
         self._save_model(steps)
+        # SEND THE MODEL TO AN S3 BUCKET
 
     def _write_training_metrics(self):
         """
@@ -196,7 +198,6 @@ class TrainerController(object):
     def start_learning(self, env: BaseUnityEnvironment, trainer_config):
         # TODO: Should be able to start learning at different lesson numbers
         # for each curriculum.
-        print("HERE2222")
         if self.meta_curriculum is not None:
             self.meta_curriculum.set_all_curriculums_to_lesson_num(self.lesson)
         self._create_model_path(self.model_path)
