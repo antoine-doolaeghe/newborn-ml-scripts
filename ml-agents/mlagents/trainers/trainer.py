@@ -9,14 +9,15 @@ import datetime
 
 import string
 import requests
-import boto3
 import json
-
 
 from mlagents.envs import UnityException, AllBrainInfo, BrainInfo
 from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.trainers import ActionInfo
 from mlagents.trainers import TrainerMetrics
+
+from .awshelpers.sns import send_sns_message
+from .awshelpers.s3 import push_model_to_s3
 
 LOGGER = logging.getLogger("mlagents.trainers")
 
@@ -51,9 +52,6 @@ episodePostQuery = string.Template(
     }
 """
 )
-
-# Create an SNS client
-sns = boto3.client('sns')
 
 
 class UnityTrainerException(UnityException):
@@ -246,11 +244,12 @@ class Trainer(object):
 
                 if api_connection:
                     # this could be a single message
-                    sns.publish(
-                        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-                        Message=json.dumps(
+                    send_sns_message(
+                        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
+                        json.dumps(
                             {"newbornId": self.brain_name, "status": "Training" + str(global_step)}, ensure_ascii=False),
                     )
+                    push_model_to_s3(self.brain_name)
                     print(self.episode_uuid)
                     self.post_episode_set(
                         self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)

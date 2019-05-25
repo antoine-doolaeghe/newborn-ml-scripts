@@ -10,7 +10,6 @@ import numpy as np
 import yaml
 from docopt import docopt
 from typing import Optional, Callable
-import boto3
 import json
 
 
@@ -22,9 +21,8 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.base_unity_environment import BaseUnityEnvironment
 from mlagents.envs.subprocess_environment import SubprocessUnityEnvironment
 
-
-# Create an SNS client
-sns = boto3.client('sns', region_name='eu-west-1')
+from .awshelpers.sns import send_sns_message
+from .awshelpers.s3 import push_model_to_s3
 
 
 def run_training(sub_id: int, run_seed: int, run_options, process_queue):
@@ -58,11 +56,12 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     api_connection = run_options['--api-connection']
     newborn_id = run_options['--newborn-id']
     # send initialized sns message
-    sns.publish(
-        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-        Message=json.dumps(
+    send_sns_message(
+        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
+        json.dumps(
             {"newbornId": newborn_id, "status": "Initializing"}, ensure_ascii=False),
     )
+    push_model_to_s3(newborn_id)
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
         model_path = './models/{run_id}-{sub_id}'.format(
@@ -107,11 +106,12 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     process_queue.put(True)
     # Begin training
     tc.start_learning(env, trainer_config)
-    sns.publish(
-        TopicArn='arn:aws:sns:eu-west-1:121745008486:newborn-status',
-        Message=json.dumps(
-            {"newbornId": newborn_id, "status": "Learning Started"}, ensure_ascii=False),
+    send_sns_message(
+        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
+        json.dumps(
+            {"newbornId": newborn_id, "status": "Learning Ended"}, ensure_ascii=False),
     )
+    push_model_to_s3(newborn_id)
 
 
 def try_create_meta_curriculum(curriculum_folder: Optional[str], env: BaseUnityEnvironment) -> Optional[MetaCurriculum]:
