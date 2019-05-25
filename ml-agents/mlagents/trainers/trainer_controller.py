@@ -36,7 +36,7 @@ class TrainerController(object):
                  external_brains: Dict[str, BrainParameters],
                  training_seed: int,
                  fast_simulation: bool,
-                 api_connection):
+                 api_connection: bool):
         """
         :param model_path: Path to save the model.
         :param summaries_dir: Folder to save training summaries.

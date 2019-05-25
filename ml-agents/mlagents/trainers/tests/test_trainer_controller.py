@@ -105,12 +105,14 @@ def dummy_offline_bc_config():
             curiosity_enc_size: 1
         ''')
 
+
 @pytest.fixture
 def dummy_offline_bc_config_with_override():
     base = dummy_offline_bc_config()
     base['testbrain'] = {}
     base['testbrain']['normalize'] = False
     return base
+
 
 @pytest.fixture
 def dummy_bad_config():
@@ -139,6 +141,7 @@ def dummy_bad_config():
             memory_size: 8
         ''')
 
+
 @pytest.fixture
 def basic_trainer_controller(brain_info):
     return TrainerController(
@@ -153,14 +156,17 @@ def basic_trainer_controller(brain_info):
         lesson=None,
         external_brains={'testbrain': brain_info},
         training_seed=99,
-        fast_simulation=True
+        fast_simulation=True,
+        api_connection=False
     )
+
 
 @patch('numpy.random.seed')
 @patch('tensorflow.set_random_seed')
 def test_initialization_seed(numpy_random_seed, tensorflow_set_seed):
     seed = 27
-    TrainerController('', '', '1', 1, None, True, False, False, None, {}, seed, True)
+    TrainerController('', '', '1', 1, None, True, False,
+                      False, None, {}, seed, True, False)
     numpy_random_seed.assert_called_with(seed)
     tensorflow_set_seed.assert_called_with(seed)
 
@@ -205,11 +211,13 @@ def test_initialize_trainer_parameters_uses_defaults(BrainInfoMock):
 
     full_config = dummy_offline_bc_config()
     expected_config = full_config['default']
-    expected_config['summary_path'] = tc.summaries_dir + '/test_run_id_testbrain'
+    expected_config['summary_path'] = tc.summaries_dir + \
+        '/test_run_id_testbrain'
     expected_config['model_path'] = tc.model_path + '/testbrain'
     expected_config['keep_checkpoints'] = tc.keep_checkpoints
 
-    assert_bc_trainer_constructed(OfflineBCTrainer, full_config, tc, brain_info_mock, expected_config)
+    assert_bc_trainer_constructed(
+        OfflineBCTrainer, full_config, tc, brain_info_mock, expected_config)
 
 
 @patch('mlagents.envs.BrainInfo')
@@ -219,14 +227,16 @@ def test_initialize_trainer_parameters_override_defaults(BrainInfoMock):
 
     full_config = dummy_offline_bc_config_with_override()
     expected_config = full_config['default']
-    expected_config['summary_path'] = tc.summaries_dir + '/test_run_id_testbrain'
+    expected_config['summary_path'] = tc.summaries_dir + \
+        '/test_run_id_testbrain'
     expected_config['model_path'] = tc.model_path + '/testbrain'
     expected_config['keep_checkpoints'] = tc.keep_checkpoints
 
     # Override value from specific brain config
     expected_config['normalize'] = False
 
-    assert_bc_trainer_constructed(OfflineBCTrainer, full_config, tc, brain_info_mock, expected_config)
+    assert_bc_trainer_constructed(
+        OfflineBCTrainer, full_config, tc, brain_info_mock, expected_config)
 
 
 @patch('mlagents.envs.BrainInfo')
@@ -236,11 +246,13 @@ def test_initialize_online_bc_trainer(BrainInfoMock):
 
     full_config = dummy_online_bc_config()
     expected_config = full_config['default']
-    expected_config['summary_path'] = tc.summaries_dir + '/test_run_id_testbrain'
+    expected_config['summary_path'] = tc.summaries_dir + \
+        '/test_run_id_testbrain'
     expected_config['model_path'] = tc.model_path + '/testbrain'
     expected_config['keep_checkpoints'] = tc.keep_checkpoints
 
-    assert_bc_trainer_constructed(OnlineBCTrainer, full_config, tc, brain_info_mock, expected_config)
+    assert_bc_trainer_constructed(
+        OnlineBCTrainer, full_config, tc, brain_info_mock, expected_config)
 
 
 @patch('mlagents.envs.BrainInfo')
@@ -250,11 +262,13 @@ def test_initialize_ppo_trainer(BrainInfoMock):
 
     full_config = dummy_config()
     expected_config = full_config['default']
-    expected_config['summary_path'] = tc.summaries_dir + '/test_run_id_testbrain'
+    expected_config['summary_path'] = tc.summaries_dir + \
+        '/test_run_id_testbrain'
     expected_config['model_path'] = tc.model_path + '/testbrain'
     expected_config['keep_checkpoints'] = tc.keep_checkpoints
 
-    assert_ppo_trainer_constructed(full_config, tc, brain_info_mock, expected_config)
+    assert_ppo_trainer_constructed(
+        full_config, tc, brain_info_mock, expected_config)
 
 
 @patch('mlagents.envs.BrainInfo')
@@ -351,7 +365,8 @@ def test_start_learning_updates_meta_curriculum_lesson_number():
     tc.lesson = 5
 
     tc.start_learning(env_mock, trainer_config)
-    meta_curriculum_mock.set_all_curriculums_to_lesson_num.assert_called_once_with(tc.lesson)
+    meta_curriculum_mock.set_all_curriculums_to_lesson_num.assert_called_once_with(
+        tc.lesson)
 
 
 def trainer_controller_with_take_step_mocks():
@@ -384,7 +399,8 @@ def test_take_step_resets_env_on_global_done():
     env_mock.reset = MagicMock(return_value=brain_info_mock)
     env_mock.global_done = True
 
-    trainer_mock.get_action = MagicMock(return_value = ActionInfo(None, None, None, None, None))
+    trainer_mock.get_action = MagicMock(
+        return_value=ActionInfo(None, None, None, None, None))
 
     tc.take_step(env_mock, brain_info_mock)
     env_mock.reset.assert_called_once()
@@ -426,7 +442,8 @@ def test_take_step_adds_experiences_to_trainer_and_trains():
     trainer_mock.add_experiences.assert_called_once_with(
         curr_info_mock, env_step_output_mock, action_output_mock.outputs
     )
-    trainer_mock.process_experiences.assert_called_once_with(curr_info_mock, env_step_output_mock)
+    trainer_mock.process_experiences.assert_called_once_with(
+        curr_info_mock, env_step_output_mock)
     trainer_mock.update_policy.assert_called_once()
     trainer_mock.write_summary.assert_called_once()
     trainer_mock.increment_step_and_update_last_reward.assert_called_once()

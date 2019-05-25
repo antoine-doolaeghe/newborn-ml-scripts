@@ -110,7 +110,6 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
         json.dumps(
             {"newbornId": newborn_id, "status": "Learning Ended"}, ensure_ascii=False),
     )
-    push_model_to_s3(newborn_id)
 
 
 def try_create_meta_curriculum(curriculum_folder: Optional[str], env: BaseUnityEnvironment) -> Optional[MetaCurriculum]:
