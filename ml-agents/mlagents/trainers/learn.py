@@ -61,7 +61,6 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
         json.dumps(
             {"newbornId": newborn_id, "status": "Initializing"}, ensure_ascii=False),
     )
-    push_model_to_s3(newborn_id)
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
         model_path = './models/{run_id}-{sub_id}'.format(
