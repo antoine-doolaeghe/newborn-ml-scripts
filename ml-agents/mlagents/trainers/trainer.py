@@ -247,7 +247,7 @@ class Trainer(object):
                     send_sns_message(
                         'arn:aws:sns:eu-west-1:121745008486:newborn-status',
                         json.dumps(
-                            {"newbornId": self.brain_name, "status": "Training" + str(global_step)}, ensure_ascii=False),
+                            {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
                     )
                     push_model_to_s3(self.brain_name)
                     print(self.episode_uuid)
