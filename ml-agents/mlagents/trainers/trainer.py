@@ -278,7 +278,7 @@ class Trainer(object):
                               simple_value=lesson_num)
             self.summary_writer.add_summary(summary, self.get_step)
             self.summary_writer.flush()
-            push_model_to_s3(self.brain_name)
+            # push_model_to_s3(self.brain_name)
 
     def write_tensorboard_text(self, key, input_dict):
         """
