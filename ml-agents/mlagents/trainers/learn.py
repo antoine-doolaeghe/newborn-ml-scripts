@@ -59,7 +59,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     send_sns_message(
         'arn:aws:sns:eu-west-1:121745008486:newborn-status',
         json.dumps(
-            {"newbornId": newborn_id, "status": "Initializing"}, ensure_ascii=False),
+            {"newbornId": newborn_id, "status": "initializing"}, ensure_ascii=False),
     )
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
@@ -108,7 +108,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     send_sns_message(
         'arn:aws:sns:eu-west-1:121745008486:newborn-status',
         json.dumps(
-            {"newbornId": newborn_id, "status": "Learning Ended"}, ensure_ascii=False),
+            {"newbornId": newborn_id, "status": "trained"}, ensure_ascii=False),
     )
 
 
