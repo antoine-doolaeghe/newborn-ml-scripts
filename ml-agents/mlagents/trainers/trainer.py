@@ -249,7 +249,6 @@ class Trainer(object):
                         json.dumps(
                             {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
                     )
-                    push_model_to_s3(self.brain_name)
                     print(self.episode_uuid)
                     self.post_episode_set(
                         self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
@@ -279,6 +278,7 @@ class Trainer(object):
                               simple_value=lesson_num)
             self.summary_writer.add_summary(summary, self.get_step)
             self.summary_writer.flush()
+            push_model_to_s3(self.brain_name)
 
     def write_tensorboard_text(self, key, input_dict):
         """
