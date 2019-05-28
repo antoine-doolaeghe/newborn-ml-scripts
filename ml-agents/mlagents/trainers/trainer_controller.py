@@ -21,6 +21,7 @@ from mlagents.trainers.bc.offline_trainer import OfflineBCTrainer
 from mlagents.trainers.bc.online_trainer import OnlineBCTrainer
 from mlagents.trainers.meta_curriculum import MetaCurriculum
 
+from .awshelpers.sns import send_sns_message
 
 class TrainerController(object):
     def __init__(self,
@@ -232,8 +233,15 @@ class TrainerController(object):
             if self.train_model:
                 self._save_model_when_interrupted(steps=self.global_step)
             pass
+
         env.close()
         if self.train_model:
+            for brain_name in self.external_brains:
+                send_sns_message(
+                    'arn:aws:sns:eu-west-1:121745008486:newborn-status',
+                    json.dumps(
+                        {"newbornId": brain_name, "status": "trained"}, ensure_ascii=False),
+                )
             self._write_training_metrics()
             self._export_graph()
 
