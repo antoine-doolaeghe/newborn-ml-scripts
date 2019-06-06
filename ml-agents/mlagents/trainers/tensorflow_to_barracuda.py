@@ -9,7 +9,7 @@ from mlagents.trainers import barracuda
 from mlagents.trainers.barracuda import Struct
 from google.protobuf import descriptor
 from google.protobuf.json_format import MessageToJson
-
+from .awshelpers.s3 import push_model_to_s3
 
 if __name__ == '__main__':
     # Handle command line argumengts
@@ -1031,4 +1031,6 @@ def convert(source_file, target_file, trim_unused_by_output="", verbose=False, c
 
     # Write to file
     barracuda.write(o_model, target_file)
+    push_model_to_s3(target_file)
+
     print('DONE: wrote', target_file, 'file.')
