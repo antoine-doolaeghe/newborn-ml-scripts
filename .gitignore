@@ -96,5 +96,7 @@ ml-agents-protobuf/Grpc*
 dist/
 build/
 
+unity-volume/
+
 # Ignore Env folder
 ENV/
