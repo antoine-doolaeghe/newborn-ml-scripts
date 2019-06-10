@@ -211,9 +211,14 @@ class UnityEnvironment(BaseUnityEnvironment):
             # Launch Unity environment
             if not docker_training:
                 if no_graphics:
-                    self.proc1 = subprocess.Popen(
-                        [launch_string, '-nographics', '-batchmode',
-                         '--port', str(self.port), '--newborn-id', self.newborn_id])
+                    if self.newborn_id:
+                        self.proc1 = subprocess.Popen(
+                            [launch_string, '-nographics', '-batchmode',
+                                '--port', str(self.port), '--newborn-id', self.newborn_id])
+                    else:
+                        self.proc1 = subprocess.Popen(
+                            [launch_string, '-nographics', '-batchmode',
+                                '--port', str(self.port)])
                 else:
                     self.proc1 = subprocess.Popen(
                         [launch_string, '--port', str(self.port), '--newborn-id', self.newborn_id])

@@ -54,7 +54,8 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     no_graphics = run_options['--no-graphics']
     trainer_config_path = run_options['<trainer-config-path>']
     api_connection = run_options['--api-connection']
-    newborn_id = run_options['--newborn-id']
+    newborn_id = (run_options['--newborn-id']
+                         if run_options['--newborn-id'] != 'None' else None)
     # send initialized sns message
     send_sns_message(
         'arn:aws:sns:eu-west-1:121745008486:newborn-status',
