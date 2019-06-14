@@ -36,7 +36,6 @@ episodeSetQuery = string.Template(
       standardReward
       created
       step
-      episode
     }
   }
 """
