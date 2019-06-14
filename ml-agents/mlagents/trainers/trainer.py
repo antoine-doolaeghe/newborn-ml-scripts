@@ -23,7 +23,7 @@ LOGGER = logging.getLogger("mlagents.trainers")
 
 api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-bwhkcmyrfvgqfccovxokq2btva",
+headers = {"X-Api-Key": "da2-gpogt2u3kzbgpo54oikxxgg7am",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
@@ -36,6 +36,7 @@ episodeSetQuery = string.Template(
       standardReward
       created
       step
+      summaryEpisodeId
     }
   }
 """
@@ -325,4 +326,4 @@ class Trainer(object):
                 return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodePostQuery.substitute(id=brain_id, uuid=uuid)))
+                request.status_code, episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)))
