@@ -53,6 +53,18 @@ episodePostQuery = string.Template(
 """
 )
 
+developmentStageUpdateQuery = string.Template(
+    """
+  mutation {
+  updateNewborn(input: {
+        id: "$id", developmentStage: "$stage"
+      }) {
+        id
+        }
+    }
+"""
+)
+
 
 class UnityTrainerException(UnityException):
     """
@@ -245,11 +257,12 @@ class Trainer(object):
 
                 if api_connection:
                     # this could be a single message
-                    send_sns_message(
-                        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
-                        json.dumps(
-                            {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
-                    )
+                    # send_sns_message(
+                    #     'arn:aws:sns:eu-west-1:121745008486:newborn-status',
+                    #     json.dumps(
+                    #         {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
+                    # )
+                    self.update_development_stage(self.brain_name, "training" + str(global_step))
                     print(self.episode_uuid)
                     self.post_episode_set(
                         self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
@@ -318,6 +331,19 @@ class Trainer(object):
     def post_episode(self, created, brain_id, uuid):
         request = requests.post(api_url,
                                 json={'query': episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)}, headers=headers)
+        if request.status_code == 200:
+            if "errors" in request.json():
+                raise UnityEnvironmentException(request.json()["errors"])
+            else:
+                return request.json()
+        else:
+            raise Exception("Query failed to run by returning code of {}. {}".format(
+                request.status_code, episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)))
+
+    @staticmethod
+    def update_development_stage(self, brain_id, development_stage):
+        request = requests.post(api_url,
+                                json={'query': developmentStageUpdateQuery.substitute(id=brain_id, stage=development_stage)}, headers=headers)
         if request.status_code == 200:
             if "errors" in request.json():
                 raise UnityEnvironmentException(request.json()["errors"])
