@@ -21,7 +21,7 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.base_unity_environment import BaseUnityEnvironment
 from mlagents.envs.subprocess_environment import SubprocessUnityEnvironment
 
-from .awshelpers.sns import update_training_status
+from .awshelpers.services import update_training_status
 from .awshelpers.s3 import push_model_to_s3
 
 

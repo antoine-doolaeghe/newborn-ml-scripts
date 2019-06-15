@@ -16,9 +16,10 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.trainers import ActionInfo
 from mlagents.trainers import TrainerMetrics
 
-from .awshelpers.sns import post_episode_set
-from .awshelpers.sns import post_episode
-from .awshelpers.sns import update_training_status
+from .awshelpers.services import post_episode_set
+from .awshelpers.services import post_episode
+from .awshelpers.services import update_training_status
+from .awshelpers.services import update_steps
 from .awshelpers.s3 import push_model_to_s3
 
 LOGGER = logging.getLogger("mlagents.trainers")
@@ -215,6 +216,7 @@ class Trainer(object):
 
                 if api_connection:
                     print(self.episode_uuid)
+                    update_steps(self.brain_name,  min(self.get_step, self.get_max_steps))
                     post_episode_set(
                         self.episode_uuid, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
 

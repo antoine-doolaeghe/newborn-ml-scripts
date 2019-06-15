@@ -35,11 +35,23 @@ episodePostQuery = string.Template(
 """
 )
 
-developmentStageUpdateQuery = string.Template(
+trainingUpdateQuery = string.Template(
     """
   mutation {
   updateNewborn(input: {
         id: "$id", training: $training
+      }) {
+        id
+        }
+    }
+"""
+)
+
+stepsUpdateQuery = string.Template(
+    """
+  mutation {
+  updateNewborn(input: {
+        id: "$id", steps: $steps
       }) {
         id
         }
@@ -72,7 +84,7 @@ def post_episode(created, brain_id, uuid):
 
 def update_training_status(brain_id, training):
     request = requests.post(api_url,
-                            json={'query': developmentStageUpdateQuery.substitute(id=brain_id, training=training)}, headers=headers)
+                            json={'query': trainingUpdateQuery.substitute(id=brain_id, training=training)}, headers=headers)
     if request.status_code == 200:
         if "errors" in request.json():
             raise UnityEnvironmentException(request.json()["errors"])
@@ -80,4 +92,16 @@ def update_training_status(brain_id, training):
             return request.json()
     else:
         raise Exception("Query failed to run by returning code of {}. {}".format(
-            request.status_code, episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)))
+            request.status_code, trainingUpdateQuery.substitute(id=brain_id, training=training)))
+
+def update_steps(brain_id, steps):
+    request = requests.post(api_url,
+                            json={'query': stepsUpdateQuery.substitute(id=brain_id, steps=steps)}, headers=headers)
+    if request.status_code == 200:
+        if "errors" in request.json():
+            raise UnityEnvironmentException(request.json()["errors"])
+        else:
+            return request.json()
+    else:
+        raise Exception("Query failed to run by returning code of {}. {}".format(
+            request.status_code, stepsUpdateQuery.substitute(id=brain_id, steps=steps)))
