@@ -58,7 +58,7 @@ stepsUpdateQuery = string.Template(
             items {
                 episodes {
                     items {
-                        steps(limit: 300) {
+                        steps {
                             items {
                                 meanReward
                                 created
