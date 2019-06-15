@@ -201,7 +201,7 @@ class Trainer(object):
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
             print(datetime.datetime.now())
-            update_training_status(self.brain_name, True)
+            update_training_status(self.brain_name, "true")
             post_episode(datetime.datetime.now(),
                               self.brain_name, episode_uuid)
 

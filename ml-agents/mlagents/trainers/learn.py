@@ -100,7 +100,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     process_queue.put(True)
     # Begin training
     tc.start_learning(env, trainer_config)
-    update_training_status(newborn_id, False)
+    update_training_status(newborn_id, "false")
 
 
 def try_create_meta_curriculum(curriculum_folder: Optional[str], env: BaseUnityEnvironment) -> Optional[MetaCurriculum]:

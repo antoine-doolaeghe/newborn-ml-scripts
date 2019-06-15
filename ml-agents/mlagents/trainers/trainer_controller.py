@@ -238,7 +238,7 @@ class TrainerController(object):
         env.close()
         if self.train_model:
             for brain_name in self.external_brains:
-                update_training_status(brain_name, False)
+                update_training_status(brain_name, "false")
             self._write_training_metrics()
             self._export_graph()
 
