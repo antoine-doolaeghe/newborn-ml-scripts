@@ -61,6 +61,9 @@ stepsUpdateQuery = string.Template(
                         steps {
                             items {
                                 meanReward
+                                created
+                                standardReward
+                                step
                             }
                         }
                     }
