@@ -16,43 +16,12 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.trainers import ActionInfo
 from mlagents.trainers import TrainerMetrics
 
-from .awshelpers.sns import send_sns_message
+from .awshelpers.sns import post_episode_set
+from .awshelpers.sns import post_episode
+from .awshelpers.sns import update_training_status
 from .awshelpers.s3 import push_model_to_s3
 
 LOGGER = logging.getLogger("mlagents.trainers")
-
-api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
-
-headers = {"X-Api-Key": "da2-gpogt2u3kzbgpo54oikxxgg7am",
-           "Content-Type": "application/json"}
-
-episodeSetQuery = string.Template(
-    """
-  mutation {
-  createSummary(input: {
-        meanReward: $meanReward, created: "$created", standardReward: $standardReward, step: $step, summaryEpisodeId: "$summaryEpisodeId"
-    }) {
-      meanReward
-      standardReward
-      created
-      step
-    }
-  }
-"""
-)
-
-episodePostQuery = string.Template(
-    """
-  mutation {
-  createEpisode(input: {
-        id: "$uuid", created: "$created", episodeModelId: "$id"
-      }) {
-        id
-        }
-    }
-"""
-)
-
 
 class UnityTrainerException(UnityException):
     """
@@ -232,7 +201,8 @@ class Trainer(object):
             episode_uuid = uuid.uuid4().hex
             self.episode_uuid = episode_uuid
             print(datetime.datetime.now())
-            self.post_episode(self, datetime.datetime.now(),
+            update_training_status(self.brain_name, True)
+            post_episode(datetime.datetime.now(),
                               self.brain_name, episode_uuid)
 
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
@@ -244,15 +214,9 @@ class Trainer(object):
                     self.stats['Environment/Cumulative Reward'])
 
                 if api_connection:
-                    # this could be a single message
-                    send_sns_message(
-                        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
-                        json.dumps(
-                            {"newbornId": self.brain_name, "status": "training" + str(global_step)}, ensure_ascii=False),
-                    )
                     print(self.episode_uuid)
-                    self.post_episode_set(
-                        self, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
+                    post_episode_set(
+                        self.episode_uuid, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
 
                 LOGGER.info(" {}: {}: Step: {}. "
                             "Time Elapsed: {:0.3f} s "
@@ -303,26 +267,3 @@ class Trainer(object):
         self.mean_rewards.append(mean_reward)
         self.standard_rewards.append(standard_reward)
 
-    @staticmethod
-    def post_episode_set(self, created, step, mean_rewards, std_rewards):
-        request = requests.post(api_url, json={
-                                'query': episodeSetQuery.substitute(created=created, meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)}, headers=headers)
-        if request.status_code == 200:
-            print(request.json())
-            return request.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodeSetQuery.substitute(created=created, meanReward=mean_rewards, standardReward=std_rewards, step=step, summaryEpisodeId=self.episode_uuid)))
-
-    @staticmethod
-    def post_episode(self, created, brain_id, uuid):
-        request = requests.post(api_url,
-                                json={'query': episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)}, headers=headers)
-        if request.status_code == 200:
-            if "errors" in request.json():
-                raise UnityEnvironmentException(request.json()["errors"])
-            else:
-                return request.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(
-                request.status_code, episodePostQuery.substitute(id=brain_id, created=created, uuid=uuid)))

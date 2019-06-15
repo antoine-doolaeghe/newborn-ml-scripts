@@ -21,7 +21,7 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.envs.base_unity_environment import BaseUnityEnvironment
 from mlagents.envs.subprocess_environment import SubprocessUnityEnvironment
 
-from .awshelpers.sns import send_sns_message
+from .awshelpers.sns import update_training_status
 from .awshelpers.s3 import push_model_to_s3
 
 
@@ -56,12 +56,6 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     api_connection = run_options['--api-connection']
     newborn_id = (run_options['--newborn-id']
                          if run_options['--newborn-id'] != 'None' else None)
-    # send initialized sns message
-    send_sns_message(
-        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
-        json.dumps(
-            {"newbornId": newborn_id, "status": "initializing"}, ensure_ascii=False),
-    )
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
         model_path = './models/{run_id}-{sub_id}'.format(
@@ -106,11 +100,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     process_queue.put(True)
     # Begin training
     tc.start_learning(env, trainer_config)
-    send_sns_message(
-        'arn:aws:sns:eu-west-1:121745008486:newborn-status',
-        json.dumps(
-            {"newbornId": newborn_id, "status": "trained"}, ensure_ascii=False),
-    )
+    update_training_status(newborn_id, False)
 
 
 def try_create_meta_curriculum(curriculum_folder: Optional[str], env: BaseUnityEnvironment) -> Optional[MetaCurriculum]:
