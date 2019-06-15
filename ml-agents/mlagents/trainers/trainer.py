@@ -16,9 +16,9 @@ from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.trainers import ActionInfo
 from mlagents.trainers import TrainerMetrics
 
-from .awshelpers.sns import post_episode_set
-from .awshelpers.sns import post_episode
-from .awshelpers.sns import update_training_status
+from .awshelpers.services import post_episode_set
+from .awshelpers.services import post_episode
+from .awshelpers.services import update_training_status
 from .awshelpers.s3 import push_model_to_s3
 
 LOGGER = logging.getLogger("mlagents.trainers")

@@ -22,7 +22,7 @@ from mlagents.trainers.bc.offline_trainer import OfflineBCTrainer
 from mlagents.trainers.bc.online_trainer import OnlineBCTrainer
 from mlagents.trainers.meta_curriculum import MetaCurriculum
 
-from .awshelpers.sns import update_training_status
+from .awshelpers.services import update_training_status
 
 class TrainerController(object):
     def __init__(self,
