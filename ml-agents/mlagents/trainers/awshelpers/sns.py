@@ -1,6 +1,7 @@
 import string
 import requests
 import json
+from mlagents.envs.exception import UnityEnvironmentException
 
 api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
 
