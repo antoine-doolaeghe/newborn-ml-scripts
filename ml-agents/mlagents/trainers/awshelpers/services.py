@@ -54,6 +54,19 @@ stepsUpdateQuery = string.Template(
         id: "$id", steps: $steps
       }) {
         id
+        models {
+            items {
+                episodes {
+                    items {
+                        steps {
+                            items {
+                                meanReward
+                            }
+                        }
+                    }
+                }
+            }
+        }
         }
     }
 """
