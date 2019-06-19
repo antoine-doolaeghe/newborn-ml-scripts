@@ -24,6 +24,7 @@ from .awshelpers.s3 import push_model_to_s3
 
 LOGGER = logging.getLogger("mlagents.trainers")
 
+
 class UnityTrainerException(UnityException):
     """
     Related to errors with the Trainer.
@@ -204,7 +205,7 @@ class Trainer(object):
             print(datetime.datetime.now())
             update_training_status(self.brain_name, "true")
             post_episode(datetime.datetime.now(),
-                              self.brain_name, episode_uuid)
+                         self.brain_name, episode_uuid)
 
         if global_step % self.trainer_parameters['summary_freq'] == 0 and global_step != 0:
             is_training = "Training." if self.is_training and self.get_step <= self.get_max_steps else "Not Training."
@@ -216,7 +217,8 @@ class Trainer(object):
 
                 if api_connection:
                     print(self.episode_uuid)
-                    update_steps(self.brain_name,  min(self.get_step, self.get_max_steps))
+                    update_steps(self.brain_name,  min(
+                        self.get_step, self.get_max_steps))
                     post_episode_set(
                         self.episode_uuid, datetime.datetime.now(), min(self.get_step, self.get_max_steps), mean_reward, std_reward)
 
@@ -268,4 +270,3 @@ class Trainer(object):
     def add_set(self, mean_reward, standard_reward):
         self.mean_rewards.append(mean_reward)
         self.standard_rewards.append(standard_reward)
-
