@@ -5,7 +5,7 @@ from mlagents.envs.exception import UnityEnvironmentException
 
 api_url = 'https://sw2hs7ufb5gevarvuyswhrndjm.appsync-api.eu-west-1.amazonaws.com/graphql'
 
-headers = {"X-Api-Key": "da2-ytkhrukddfhllkypvo66vjqvx4",
+headers = {"X-Api-Key": "da2-5aipqbxwx5eyfkoain3jhxtigm",
            "Content-Type": "application/json"}
 
 episodeSetQuery = string.Template(
