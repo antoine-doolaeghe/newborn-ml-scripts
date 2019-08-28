@@ -71,7 +71,7 @@ order will download `mlagents_envs` from PyPi.
 
 Use the command mlagents-learn to train your agents. This command is installed with the mlagents package and its implementation can be found at ml-agents/mlagents/trainers/learn.py. The configuration file, like config/trainer_config.yaml specifies the hyperparameters used during training. You can edit this file with a text editor to add a specific configuration for each Brain.
 
-`mlagents-learn <trainer-config-file> --env=<env_name> --run-id=<run-identifier> --train --newborn-id=<newborn-id> --api-connection`
+`mlagents-learn <trainer-config-file> --env=<env_name> --run-id=<run-identifier> --train --newborn-id=<newborn-id> --trainer-id=<trainer-id> --api-connection`
 
 where
 

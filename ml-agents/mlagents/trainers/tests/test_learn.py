@@ -23,7 +23,8 @@ def basic_options():
         '<trainer-config-path>': 'basic_path',
         '--debug': False,
         '--api-connection': False,
-        '--newborn-id': 'testnewbornid'
+        '--newborn-id': 'testnewbornid',
+        '--trainer-id': 'testtrainerid'
     }
 
 
