@@ -35,7 +35,8 @@ class UnityEnvironment(BaseUnityEnvironment):
                  docker_training: bool = False,
                  no_graphics: bool = False,
                  timeout_wait: int = 30,
-                 newborn_id=None):
+                 newborn_id=None,
+                 trainer_id=None):
         """
         Starts a new unity environment and establishes a connection with the environment.
         Notice: Currently communication between Unity and Python takes place over an open socket without authentication.
@@ -60,6 +61,7 @@ class UnityEnvironment(BaseUnityEnvironment):
             worker_id, base_port, timeout_wait)
 
         self.newborn_id = newborn_id
+        self.trainer_id = trainer_id
 
         # If the environment name is None, a new environment will not be launched
         # and the communicator will directly try to connect to an existing unity environment.
@@ -211,17 +213,17 @@ class UnityEnvironment(BaseUnityEnvironment):
             # Launch Unity environment
             if not docker_training:
                 if no_graphics:
-                    if self.newborn_id:
+                    if self.newborn_id and self.trainer_id:
                         self.proc1 = subprocess.Popen(
                             [launch_string, '-nographics', '-batchmode',
-                                '--port', str(self.port), '--newborn-id', self.newborn_id])
+                                '--port', str(self.port), '--newborn-id', self.newborn_id, '--trainer-id', self.trainer_id])
                     else:
                         self.proc1 = subprocess.Popen(
                             [launch_string, '-nographics', '-batchmode',
                                 '--port', str(self.port)])
                 else:
                     self.proc1 = subprocess.Popen(
-                        [launch_string, '--port', str(self.port), '--newborn-id', self.newborn_id])
+                        [launch_string, '--port', str(self.port), '--newborn-id', self.newborn_id, '--trainer-id', self.trainer_id])
             else:
                 """
                 Comments for future maintenance:

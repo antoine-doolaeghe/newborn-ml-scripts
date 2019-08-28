@@ -55,7 +55,9 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
     trainer_config_path = run_options['<trainer-config-path>']
     api_connection = run_options['--api-connection']
     newborn_id = (run_options['--newborn-id']
-                         if run_options['--newborn-id'] != 'None' else None)
+                  if run_options['--newborn-id'] != 'None' else None)
+    trainer_id = (run_options['--trainer-id']
+                  if run_options['--trainer-id'] != 'None' else None)
     # Recognize and use docker volume if one is passed as an argument
     if not docker_target_name:
         model_path = './models/{run_id}-{sub_id}'.format(
@@ -85,6 +87,7 @@ def run_training(sub_id: int, run_seed: int, run_options, process_queue):
         run_seed,
         base_port + (sub_id * num_envs),
         newborn_id,
+        trainer_id
     )
     env = SubprocessUnityEnvironment(env_factory, num_envs)
     maybe_meta_curriculum = try_create_meta_curriculum(curriculum_folder, env)
@@ -165,7 +168,8 @@ def create_environment_factory(
         no_graphics: bool,
         seed: Optional[int],
         start_port: int,
-        newborn_id: int
+        newborn_id: int,
+        trainer_id: int
 ) -> Callable[[int], BaseUnityEnvironment]:
     if env_path is not None:
         # Strip out executable extensions if passed
@@ -201,6 +205,7 @@ def create_environment_factory(
             no_graphics=no_graphics,
             base_port=start_port,
             newborn_id=newborn_id,
+            trainer_id=trainer_id
         )
     return create_unity_environment
 
@@ -249,7 +254,8 @@ def main():
       --no-graphics              Whether to run the environment in no-graphics mode [default: False].
       --debug                    Whether to run ML-Agents in debug mode with detailed logging [default: False].
       --api-connection           Connect api 
-      --newborn-id=<n>           Newborn id
+      --newborn-id=<n>           Newborn Id to be trained
+      --trainer-id=<n>           Trainer Id to train the Newborn with
     '''
 
     options = docopt(_USAGE)
