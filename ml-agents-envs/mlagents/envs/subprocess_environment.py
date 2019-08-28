@@ -21,10 +21,11 @@ class EnvironmentResponse(NamedTuple):
     payload: Any
 
 
-class UnityEnvWorker(NamedTuple):
-    process: Process
-    worker_id: int
-    conn: Connection
+class UnityEnvWorker:
+    def __init__(self, process, worker_id, connection):
+        self.process = process
+        self.worker_id = worker_id
+        self.conn = connection
 
     def send(self, name: str, payload=None):
         try:
@@ -42,14 +43,15 @@ class UnityEnvWorker(NamedTuple):
 
     def close(self):
         try:
-            self.conn.send(EnvironmentCommand('close'))
+            self.conn.send(EnvironmentCommand('close', None))
         except (BrokenPipeError, EOFError):
             pass
         self.process.join()
 
 
 def worker(parent_conn: Connection, pickled_env_factory: str, worker_id: int):
-    env_factory: Callable[[int], UnityEnvironment] = cloudpickle.loads(pickled_env_factory)
+    env_factory: Callable[[int], UnityEnvironment] = cloudpickle.loads(
+        pickled_env_factory)
     env = env_factory(worker_id)
 
     def _send_response(cmd_name, payload):
@@ -61,7 +63,8 @@ def worker(parent_conn: Connection, pickled_env_factory: str, worker_id: int):
             cmd: EnvironmentCommand = parent_conn.recv()
             if cmd.name == 'step':
                 vector_action, memory, text_action, value = cmd.payload
-                all_brain_info = env.step(vector_action, memory, text_action, value)
+                all_brain_info = env.step(
+                    vector_action, memory, text_action, value)
                 _send_response('step', all_brain_info)
             elif cmd.name == 'external_brains':
                 _send_response('external_brains', env.external_brains)
@@ -100,7 +103,8 @@ class SubprocessUnityEnvironment(BaseUnityEnvironment):
         # Need to use cloudpickle for the env factory function since function objects aren't picklable
         # on Windows as of Python 3.6.
         pickled_env_factory = cloudpickle.dumps(env_factory)
-        child_process = Process(target=worker, args=(child_conn, pickled_env_factory, worker_id))
+        child_process = Process(target=worker, args=(
+            child_conn, pickled_env_factory, worker_id))
         child_process.start()
         return UnityEnvWorker(child_process, worker_id, parent_conn)
 
@@ -112,7 +116,8 @@ class SubprocessUnityEnvironment(BaseUnityEnvironment):
 
         agent_counts_cum = {}
         for brain_name in self.env_agent_counts.keys():
-            agent_counts_cum[brain_name] = np.cumsum(self.env_agent_counts[brain_name])
+            agent_counts_cum[brain_name] = np.cumsum(
+                self.env_agent_counts[brain_name])
 
         # Split the actions provided by the previous set of agent counts, and send the step
         # commands to the workers.
@@ -135,12 +140,14 @@ class SubprocessUnityEnvironment(BaseUnityEnvironment):
                 if value and value.get(brain_name) is not None:
                     env_value[brain_name] = value[brain_name][start_ind:end_ind]
 
-            env.send('step', (env_actions, env_memory, env_text_action, env_value))
+            env.send('step', (env_actions, env_memory,
+                              env_text_action, env_value))
         self.waiting = True
 
     def step_await(self) -> AllBrainInfo:
         if not self.waiting:
-            raise UnityEnvironmentException('Tried to await an environment step, but no async step was taken.')
+            raise UnityEnvironmentException(
+                'Tried to await an environment step, but no async step was taken.')
 
         steps = [self.envs[i].recv() for i in range(len(self.envs))]
         self._get_agent_counts(map(lambda s: s.payload, steps))
@@ -195,13 +202,14 @@ class SubprocessUnityEnvironment(BaseUnityEnvironment):
             all_brain_info: AllBrainInfo = env_step.payload
             for brain_name, brain_info in all_brain_info.items():
                 for i in range(len(brain_info.agents)):
-                    brain_info.agents[i] = str(env_step.worker_id) + '-' + str(brain_info.agents[i])
+                    brain_info.agents[i] = str(
+                        env_step.worker_id) + '-' + str(brain_info.agents[i])
                 if accumulated_brain_info:
                     accumulated_brain_info[brain_name].merge(brain_info)
             if not accumulated_brain_info:
                 accumulated_brain_info = copy.deepcopy(all_brain_info)
         return accumulated_brain_info
 
-    def _broadcast_message(self, name: str, payload = None):
+    def _broadcast_message(self, name: str, payload=None):
         for env in self.envs:
             env.send(name, payload)
